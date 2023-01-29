@@ -4,7 +4,7 @@
 #include <thread>
 
 namespace BetterSongList::SongDetails {
-    static SongDetailsCache::SongDetails* songDetails;
+    static SongDetailsCache::SongDetails* songDetails = nullptr;
     SongDetailsCache::SongDetails* get_songDetails() {
         return songDetails;
     }
@@ -31,7 +31,7 @@ namespace BetterSongList::SongDetails {
     }
 
     std::string GetUnavailabilityReason() {
-        if (finishedInitAttempt && songDetails->songs.get_isDataAvailable() || songDetails->songs.size() == 0) {
+        if (finishedInitAttempt && !songDetails->songs.get_isDataAvailable() || songDetails->songs.size() == 0) {
             return "Initialization failed";
         }
         return "";
@@ -41,18 +41,18 @@ namespace BetterSongList::SongDetails {
         if (attemptedToInit) return;
         attemptedToInit = true;
         std::thread([](){
-            // DataHolder::loading = true;
             DEBUG("Getting songdetails");
             songDetails = SongDetailsCache::SongDetails::Init().get();
             DEBUG("Got songdetails");
 
 
             if (!songDetails->songs.get_isDataAvailable()) {
-                // this->SongDataError();
+                finishedInitAttempt = true;
+                DEBUG("BSL Failed");
             } else {
-                // this->SongDataDone();
+                DEBUG("BSL Not failed Songs size:{}", songDetails->songs.size());
+                finishedInitAttempt = true;
             }
-            finishedInitAttempt = true;
         }).detach();
     }
 

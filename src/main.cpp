@@ -24,8 +24,6 @@ extern "C" void load() {
     if (!LoadConfig()) SaveConfig();
 
     BetterSongList::SongDetails::Init();
-
-    SongDetailsCache::SongDetails::Init();
 }
 
 BSML_DATACACHE(double_arrow) {

@@ -72,7 +72,8 @@ namespace BetterSongList {
         },
         [](const SongDetailsCache::Song* song) -> std::string {
             auto uploaded = song->uploadTimeUnix;
-            struct tm* tm = localtime((time_t*) &uploaded);
+            auto time = (time_t) uploaded;
+            struct tm* tm = localtime(&time);
             // since int division is floored, we can get an index for quarter by removing 1 and dividing by 3,
             // then we just add 1 back to get from 0-3 to 1-4
             auto q = ((tm->tm_mon - 1) / 3) + 1;
