@@ -6,6 +6,8 @@
 #include "bsml/shared/BSMLDataCache.hpp"
 #include "assets.hpp"
 #include "config.hpp"
+#include "song-details/shared/SongDetails.hpp"
+#include "song-details/shared/SongArray.hpp"
 
 #include "Utils/SongDetails.hpp"
 
@@ -22,6 +24,8 @@ extern "C" void load() {
     if (!LoadConfig()) SaveConfig();
 
     BetterSongList::SongDetails::Init();
+
+    SongDetailsCache::SongDetails::Init();
 }
 
 BSML_DATACACHE(double_arrow) {

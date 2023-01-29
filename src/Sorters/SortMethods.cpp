@@ -6,7 +6,6 @@
 #include "Sorters/Models/FolderDateSorter.hpp"
 #include "Sorters/Models/FunctionSorter.hpp"
 
-#include "sdc-wrapper/shared/BeatStarSong.hpp"
 
 namespace BetterSongList {
     static ComparableFunctionSorterWithLegend alphabeticalSongname(
@@ -40,8 +39,8 @@ namespace BetterSongList {
 
     static FolderDateSorter downloadTime{};
 
-    static std::optional<float> StarsProcessor(const SDC_wrapper::BeatStarSong* song) {
-        float ret = config.get_sortAsc() ? song->GetMinStarValue() : song->GetMaxStarValue();
+    static std::optional<float> StarsProcessor(const SongDetailsCache::Song* song) {
+        float ret = config.get_sortAsc() ? song->minStar() : song->maxStar();
         if (ret == 0) return std::nullopt;
         return ret;
     }
@@ -68,12 +67,12 @@ namespace BetterSongList {
     );
 
     static BasicSongDetailsSorterWithLegend beatSaverDate(
-        [](const SDC_wrapper::BeatStarSong* song) -> std::optional<float> { 
-            return song->uploaded_unix_time;
+        [](const SongDetailsCache::Song* song) -> std::optional<float> { 
+            return song->uploadTimeUnix;
         },
-        [](const SDC_wrapper::BeatStarSong* song) -> std::string {
-            auto uploaded = song->uploaded_unix_time;
-            struct tm* tm = localtime(&uploaded);
+        [](const SongDetailsCache::Song* song) -> std::string {
+            auto uploaded = song->uploadTimeUnix;
+            struct tm* tm = localtime((time_t*) &uploaded);
             // since int division is floored, we can get an index for quarter by removing 1 and dividing by 3,
             // then we just add 1 back to get from 0-3 to 1-4
             auto q = ((tm->tm_mon - 1) / 3) + 1;

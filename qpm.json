@@ -53,11 +53,6 @@
       }
     },
     {
-      "id": "sdc-wrapper",
-      "versionRange": "*",
-      "additionalData": {}
-    },
-    {
       "id": "songloader",
       "versionRange": "^0.10.14",
       "additionalData": {
@@ -74,11 +69,9 @@
       }
     },
     {
-      "id": "songdatacore",
-      "versionRange": "*",
-      "additionalData": {
-        "private": true
-      }
+      "id": "song-details",
+      "versionRange": "^0.1.9",
+      "additionalData": {}
     },
     {
       "id": "sombrero",

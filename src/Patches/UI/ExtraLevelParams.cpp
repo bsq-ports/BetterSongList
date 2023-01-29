@@ -19,20 +19,33 @@
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "GlobalNamespace/CustomDifficultyBeatmap.hpp"
 #include "GlobalNamespace/BeatmapDifficultyMethods.hpp"
+#include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
+#include "GlobalNamespace/BeatmapDifficulty.hpp"
 #include "GlobalNamespace/IDifficultyBeatmapSet.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData.hpp"
+#include "song-details/shared/SongDetails.hpp"
+#include "song-details/shared/Data/MapDifficulty.hpp"
+#include "song-details/shared/Data/Song.hpp"
+#include "song-details/shared/Data/SongDifficulty.hpp"
+#include "Utils/SongDetails.hpp"
+#include "song-details/shared/DiffArray.hpp"
 
 #include <algorithm>
 
-std::array<std::string, 5> diffToString {
-    "Easy",
-	"Normal",
-	"Hard",
-	"Expert",
-	"ExpertPlus",
+std::array<SongDetailsCache::MapDifficulty, 5> diffToString {
+    SongDetailsCache::MapDifficulty::Easy,
+    SongDetailsCache::MapDifficulty::Normal,
+    SongDetailsCache::MapDifficulty::Hard,
+    SongDetailsCache::MapDifficulty::Expert,
+    SongDetailsCache::MapDifficulty::ExpertPlus
 };
 
-std::string_view BeatmapDifficultyToString(int value) {
+// Map for difficulties
+static const std::unordered_map<int, SongDetailsCache::MapDifficulty> diffMap = {
+    
+};
+
+SongDetailsCache::MapDifficulty BeatmapDifficultyToString(int value) {
     return diffToString.at(value);
 }
 
@@ -112,13 +125,13 @@ namespace BetterSongList::Hooks {
                 INFO("No song details available");
                 fieldsW[0]->set_text("N/A");
                 fieldsW[1]->set_text("N/A");
-            } else if (!BetterSongList::SongDetails::get_songDetails().empty()) {
+            } else if (BetterSongList::SongDetails::get_songDetails()->songs.size() != 0) {
                 INFO("details available, not empty");
                 auto parentSet = selectedDifficultyBeatmap->get_parentDifficultyBeatmapSet();
                 auto characteristic = parentSet ? parentSet->get_beatmapCharacteristic() : nullptr;
-                auto ch = characteristic ? SDC_wrapper::BeatStarCharacteristic::BeatmapCharacteristicToBeatStarCharacteristic(characteristic) : song_data_core::BeatStarCharacteristics::Unknown;
+                auto ch = characteristic ? BetterSongList::SongDetails::BeatmapCharacteristicToBeatStarCharacteristic(characteristic) : SongDetailsCache::MapCharacteristic::Custom;
 
-                if (ch != song_data_core::BeatStarCharacteristics::Standard) {
+                if (ch != SongDetailsCache::MapCharacteristic::Standard) {
                     INFO("Characteristic was not standard");
                     fieldsW[0]->set_text("-");
                     fieldsW[1]->set_text("-");
@@ -126,16 +139,34 @@ namespace BetterSongList::Hooks {
                     INFO("Characteristic was standard");
                     auto hash = BeatmapUtils::GetHashOfPreview(level->i_IPreviewBeatmapLevel());
                     INFO("Got hash: {}", hash);
-                    const SDC_wrapper::BeatStarSong* song = nullptr;
-                    const SDC_wrapper::BeatStarSongDifficultyStats* diff = nullptr;
+                    const SongDetailsCache::Song* song = nullptr;
+                    const SongDetailsCache::SongDifficulty* diff = nullptr;
+                    
+                    // Get song and difficulty
+                    {
+                        if (!hash.empty()) {
+                            auto &songRef = SongDetails::get_songDetails()->songs.FindByHash(hash);
+                            if (songRef != SongDetailsCache::Song::none) {
+                                song = &songRef;
+                            }
+                            if (song != nullptr) {
+
+                                // auto & diffRef = song->GetDifficulty(BeatmapDifficultyToString(selectedDifficultyBeatmap->get_difficulty()), ch);
+                                // if (diffRef != SongDetailsCache::SongDifficulty::none) {
+                                //     diff = &diffRef;
+                                // }
+                            }
+                        }
+                    }
+                    
                     if (hash.empty() || /* no hash */
-                        !(song = SDC_wrapper::BeatStarSong::GetSong(hash)) || /* song not found */
-                        !(diff = song->GetDifficulty(ch, BeatmapDifficultyToString(selectedDifficultyBeatmap->get_difficulty()))) /* diff not found */
+                        !song || /* song not found */
+                        !diff /* diff not found */
                     ) {
                         INFO("either hash was empty, the song was not found, or the diff was not found");
                         fieldsW[0]->set_text("?");
                         fieldsW[1]->set_text("?");
-                    } else if (!diff->ranked) {
+                    } else if (!diff->ranked()) {
                         INFO("the diff was not ranked");
                         fieldsW[0]->set_text("-");
                         fieldsW[1]->set_text("-");
