@@ -150,11 +150,10 @@ namespace BetterSongList::Hooks {
                                 song = &songRef;
                             }
                             if (song != nullptr) {
-
-                                // auto & diffRef = song->GetDifficulty(BeatmapDifficultyToString(selectedDifficultyBeatmap->get_difficulty()), ch);
-                                // if (diffRef != SongDetailsCache::SongDifficulty::none) {
-                                //     diff = &diffRef;
-                                // }
+                                auto & diffRef = song->GetDifficulty(BeatmapDifficultyToString(selectedDifficultyBeatmap->get_difficulty()), ch);
+                                if (diffRef != SongDetailsCache::SongDifficulty::none) {
+                                    diff = &diffRef;
+                                }
                             }
                         }
                     }
