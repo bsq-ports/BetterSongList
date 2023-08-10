@@ -34,8 +34,12 @@
 						hover-hint='Will display the maps JD instead of its configured offset'
 				/>
 					<slider-setting
-						text='PP Accuracy Scale' apply-on-change='true' value='accuracyMultiplier' min='0.2' max='2' increment='0.02'
+						text='PP Accuracy Scale (SS Only)' apply-on-change='true' value='accuracyMultiplier' min='0.2' max='2' increment='0.02'
 						hover-hint='Scales the Accuracy used to calculate a PP value with by this amount to be closer to your skill / preference'
+				/>
+					<list-setting
+						text='Preferred Leaderboard' apply-on-change='true' value='preferredLeaderboard' choices='preferredLeaderboardChoices'
+						hover-hint="Which leaderboards Star value to display"
 				/>
 			</vertical>
 			<horizontal pad-top='4' child-expand-height='false' spacing='2'>

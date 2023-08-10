@@ -37,6 +37,7 @@ void Config::SaveConfig() {
     Save(allowPluginSortsAndFilters);
     Save(sortAsc);
     Save(settingsSeenInVersion);
+    Save(preferredLeaderboard);
 
     get_config().Write();
     INFO("Saved Configuration!");
@@ -93,6 +94,7 @@ bool Config::LoadConfig() {
     GET_BOOL(allowPluginSortsAndFilters);
     GET_BOOL(sortAsc);
     GET_STRING(settingsSeenInVersion);
+    GET_STRING(preferredLeaderboard);
 
     if (foundEverything)
         INFO("Loaded Configuration!");

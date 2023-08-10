@@ -162,20 +162,29 @@ namespace BetterSongList::Hooks {
                         !song || /* song not found */
                         !diff /* diff not found */
                     ) {
-                        INFO("either hash was empty, the song was not found, or the diff was not found");
+                        INFO("No diff|song|hash found, setting to ?");
                         fieldsW[0]->set_text("?");
                         fieldsW[1]->set_text("?");
-                    } else if (!diff->ranked()) {
-                        INFO("the diff was not ranked");
-                        fieldsW[0]->set_text("-");
-                        fieldsW[1]->set_text("-");
+                        fieldsW[3]->set_text("?");
                     } else {
                         INFO("diff was found and ranked, now to show those values");
-                        auto acc = 0.984f - (std::max(0.0f, (diff->stars - 1.5f) / (12.5f - 1.5f) / config.get_accuracyMultiplier()) * .027f);
-						auto pp = PPUtils::PPPercentage(acc) * diff->stars * 42.1f;
+                        bool isSs = config.get_preferredLeaderboardAsString() == "ScoreSaber";
+                        float stars = isSs ? diff->starsSS : diff->starsBL;
 
-                        fieldsW[0]->set_text(fmt::format("{0} <size=2.5>({1:0.0f})</size>", (int)pp, acc));
-						fieldsW[1]->set_text(fmt::format("{:1.1f}", diff->stars));
+                        if (stars <= 0) {
+                            fieldsW[0]->set_text("-");
+                        } else if (isSs) {
+                            auto acc = 0.984f - (std::max(0.0f, (diff->starsSS - 1.5f) / (12.5f - 1.5f) / config.get_accuracyMultiplier()) * .027f);
+                            auto pp = PPUtils::PPPercentage(acc) * diff->starsSS * 42.1f;
+
+                            fieldsW[0]->set_text(fmt::format("{0} <size=2.5>({1:0.0f})</size>", (int)pp, acc));
+                            fieldsW[1]->set_text(fmt::format("{:1.1f}", diff->starsSS));
+
+                        } else {
+                            fieldsW[0]->set_text("?");
+                            fieldsW[1]->set_text(fmt::format("{:1.1f}", diff->starsBL));
+                        }
+                        
                     }
                 }
             } else if (!BetterSongList::SongDetails::get_finishedInitAttempt()){
