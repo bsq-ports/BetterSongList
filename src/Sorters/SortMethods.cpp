@@ -40,7 +40,7 @@ namespace BetterSongList {
     static FolderDateSorter downloadTime{};
 
     static std::optional<float> StarsProcessor(const SongDetailsCache::Song* song) {
-        float ret = config.get_sortAsc() ? song->minStar() : song->maxStar();
+        float ret = config.get_sortAsc() ? song->minStarSS() : song->minStarSS();
         if (ret == 0) return std::nullopt;
         return ret;
     }
