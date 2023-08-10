@@ -47,14 +47,14 @@
     },
     {
       "id": "paper",
-      "versionRange": "~1.2.9",
+      "versionRange": "=1.2.9",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "songloader",
-      "versionRange": "^0.10.14",
+      "versionRange": "^0.10.17",
       "additionalData": {
         "private": true,
         "extraFiles": [
@@ -75,7 +75,7 @@
     },
     {
       "id": "sombrero",
-      "versionRange": "^0.1.35",
+      "versionRange": "^0.1.37",
       "additionalData": {
         "private": true
       }
@@ -89,14 +89,14 @@
     },
     {
       "id": "questui",
-      "versionRange": "^0.17.10",
+      "versionRange": "^0.17.11",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "playlistcore",
-      "versionRange": "^1.1.4",
+      "versionRange": "^1.1.6",
       "additionalData": {
         "private": true
       }
