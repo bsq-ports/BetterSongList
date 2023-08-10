@@ -8,8 +8,17 @@
 #include "Filters/Models/RequirementsFilter.hpp"
 
 namespace BetterSongList {
+    static BasicSongDetailsFilter blqualified([](const SongDetailsCache::Song* x){ 
+        return hasFlags(x->rankedStates, SongDetailsCache::RankedStates::BeatleaderQualified);
+    });
+
+    static BasicSongDetailsFilter blranked([](const SongDetailsCache::Song* x){ 
+        return hasFlags(x->rankedStates, SongDetailsCache::RankedStates::BeatleaderRanked);
+    });
+
+    // Legacy ranked filter
     static BasicSongDetailsFilter ranked([](const SongDetailsCache::Song* x){ 
-        return x->rankedStatus == SongDetailsCache::RankedStatus::Ranked;
+        return hasFlags(x->rankedStates, SongDetailsCache::RankedStates::ScoresaberRanked );
     });
     
     static BasicSongDetailsFilter unranked([](const SongDetailsCache::Song* x){ 
@@ -53,6 +62,8 @@ namespace BetterSongList {
     }
 
     std::map<std::string, IFilter*> FilterMethods::methods{
+        {"BL Qualified", &blqualified},
+        {"BL Ranked", &blranked},
         {"Ranked", &ranked},
 		{"Unplayed", &unplayed},
 		{"Played", &played},

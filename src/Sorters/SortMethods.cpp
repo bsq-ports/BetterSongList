@@ -40,7 +40,13 @@ namespace BetterSongList {
     static FolderDateSorter downloadTime{};
 
     static std::optional<float> StarsProcessor(const SongDetailsCache::Song* song) {
-        float ret = config.get_sortAsc() ? song->minStarSS() : song->minStarSS();
+        float ret = config.get_sortAsc() ? song->maxStarSS() : song->minStarSS();
+        if (ret == 0) return std::nullopt;
+        return ret;
+    }
+
+    static std::optional<float> StarsProcessorBL(const SongDetailsCache::Song* song) {
+        float ret = config.get_sortAsc() ? song->maxStarBL() : song->minStarBL();
         if (ret == 0) return std::nullopt;
         return ret;
     }
@@ -49,6 +55,17 @@ namespace BetterSongList {
         [](auto song){ return StarsProcessor(song); },
         [](auto song) -> std::string {
             auto y = StarsProcessor(song);
+            if (!y.has_value()) return "N/A";
+
+            return fmt::format("{:.1f}", y.value());
+        }
+    );
+
+    // TODO: If beatleader gets integrated, remove this
+    static BasicSongDetailsSorterWithLegend blstars(
+        [](auto song){ return StarsProcessorBL(song); },
+        [](auto song) -> std::string {
+            auto y = StarsProcessorBL(song);
             if (!y.has_value()) return "N/A";
 
             return fmt::format("{:.1f}", y.value());
@@ -101,7 +118,7 @@ namespace BetterSongList {
 
         auto itr = methods.find(name);
         if (itr != methods.end()) {
-            ERROR("sorter with name {} was already registerd!", name);
+            ERROR("sorter with name {} was already registered!", name);
             return false;
         }
 
@@ -110,6 +127,7 @@ namespace BetterSongList {
     }
 
     std::map<std::string, ISorter*> SortMethods::methods{
+        {"BL Stars", &blstars},
 		{"Song Name", &alphabeticalSongname},
 		{"Mapper Name", &alphabeticalMapper},
 		{"Download Date", &downloadTime},
