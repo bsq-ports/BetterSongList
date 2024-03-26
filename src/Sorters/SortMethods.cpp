@@ -127,11 +127,11 @@ namespace BetterSongList {
     }
 
     std::map<std::string, ISorter*> SortMethods::methods{
-        {"BL Stars", &blstars},
 		{"Song Name", &alphabeticalSongname},
 		{"Mapper Name", &alphabeticalMapper},
 		{"Download Date", &downloadTime},
-		{"Ranked Stars", &stars},
+        {"BL Stars", &blstars},
+		{"SS Stars", &stars},
 		{"Song Length", &songLength},
 		{"BPM", &bpm},
 		{"BeatSaver Date", &beatSaverDate},

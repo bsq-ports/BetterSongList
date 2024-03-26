@@ -64,7 +64,7 @@ namespace BetterSongList {
     std::map<std::string, IFilter*> FilterMethods::methods{
         {"BL Qualified", &blqualified},
         {"BL Ranked", &blranked},
-        {"Ranked", &ranked},
+        {"SS Ranked", &ranked},
 		{"Unplayed", &unplayed},
 		{"Played", &played},
 		{"Requirements", &requirements},

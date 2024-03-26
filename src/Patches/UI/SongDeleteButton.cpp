@@ -16,7 +16,7 @@
 #include "UnityEngine/UI/Button_ButtonClickedEvent.hpp"
 
 #include "songloader/shared/API.hpp"
-
+#include "logging.hpp"
 namespace BetterSongList::Hooks {
     SafePtr<GlobalNamespace::CustomPreviewBeatmapLevel> SongDeleteButton::lastLevel;
     SafePtrUnity<UnityEngine::UI::Button> SongDeleteButton::deleteButton;
@@ -38,7 +38,7 @@ namespace BetterSongList::Hooks {
 
             auto onClick = UnityEngine::UI::Button::ButtonClickedEvent::New_ctor();
             auto klass = deleteConfirmHandlerInstance->klass;
-            auto minfo = il2cpp_functions::class_get_method_from_name(klass, "Confirm", 0);
+            auto minfo = il2cpp_functions::class_get_method_from_name(klass, "ConfirmDelete", 0);
             auto action = BSML::MakeUnityAction(deleteConfirmHandlerInstance, minfo);
             onClick->AddListener(action);
             deleteButton->set_onClick(onClick);
@@ -86,7 +86,7 @@ namespace BetterSongList {
     SafePtr<DeleteConfirmHandler> DeleteConfirmHandler::instance;
 
     DeleteConfirmHandler* DeleteConfirmHandler::get_instance() {
-        if (!instance || !instance.ptr()) {
+        if (!instance || !instance.ptr()) {  
             instance.emplace(DeleteConfirmHandler::New_ctor());
         }
 
@@ -102,11 +102,11 @@ namespace BetterSongList {
         auto lastLevel = BetterSongList::Hooks::SongDeleteButton::get_lastLevel();
         if (!lastLevel) return;
 
-        RuntimeSongLoader::API::DeleteSong(static_cast<std::string>(lastLevel->get_customLevelPath()));
 
         if (!BetterSongList::Hooks::SongDeleteButton::get_isWip()) {
             return;
         }
+        RuntimeSongLoader::API::DeleteSong(static_cast<std::string>(lastLevel->get_customLevelPath()));
 
         if (deleteModal && deleteModal->m_CachedPtr.m_value)
             deleteModal->Hide();
