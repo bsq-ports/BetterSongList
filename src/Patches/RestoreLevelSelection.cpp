@@ -44,13 +44,14 @@ namespace BetterSongList::Hooks {
         }
 
         LoadPackFromCollectionName();
-
-        startState = GlobalNamespace::LevelSelectionFlowCoordinator::State::New_ctor(
-            System::Nullable_1<LevelCategory>(true, restoreCategory),
-            get_restoredPack(),
-            m,
-            nullptr
-        );
+        if (m) {
+            startState = GlobalNamespace::LevelSelectionFlowCoordinator::State::New_ctor(
+                System::Nullable_1<LevelCategory>(true, restoreCategory),
+                get_restoredPack(),
+                m,
+                nullptr
+            );
+        }     
     }
 
     void RestoreLevelSelection::LoadPackFromCollectionName() {

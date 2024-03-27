@@ -193,8 +193,11 @@ namespace BetterSongList::Hooks {
                 fieldsW[0]->set_text("...");
                 fieldsW[1]->set_text("...");
             }
+            
+            fieldsW[2]->set_text("?");
+            fieldsW[3]->set_text("?");
 
-            auto customBeatmapLevelOpt = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(level);
+            /*auto customBeatmapLevelOpt = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(level);
             if (customBeatmapLevelOpt) {
                 auto customBeatmapLevel = customBeatmapLevelOpt.value();
                 auto infoPath = std::string(customBeatmapLevel->customLevelPath) + "/info.dat";
@@ -230,7 +233,7 @@ namespace BetterSongList::Hooks {
             } else {
                 fieldsW[2]->set_text("?");
                 fieldsW[3]->set_text("?");
-            }
+            }*/
         } else {
             ERROR("Fields was nullptr!");
         }
