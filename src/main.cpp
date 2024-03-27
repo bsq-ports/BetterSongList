@@ -1,4 +1,4 @@
-#include "modloader/shared/modloader.hpp"
+#include "scotland2/shared/loader.hpp"
 #include "hooking.hpp"
 #include "logging.hpp"
 
@@ -11,14 +11,14 @@
 
 #include "Utils/SongDetails.hpp"
 
-ModInfo modInfo{MOD_ID, VERSION};
-
-extern "C" void setup(ModInfo& info) {
-    info = modInfo;
+extern "C" void setup(CModInfo* info) {
+    info->id = MOD_ID;
+    info->version = VERSION;
+    info->version_long = 0;
 }
 
-extern "C" void load() {
-    Hooks::InstallHooks(BetterSongList::Logging::getLogger());
+extern "C" void late_load() {
+    BetterSongList::Hooking::InstallHooks();
     custom_types::Register::AutoRegister();
 
     if (!LoadConfig()) SaveConfig();

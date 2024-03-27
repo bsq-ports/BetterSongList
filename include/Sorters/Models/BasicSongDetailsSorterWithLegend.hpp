@@ -14,8 +14,8 @@ namespace BetterSongList {
             BasicSongDetailsSorterWithLegend(ValueGetterFunc sortFunc, LegendGetterFunc legendFunc);
             virtual bool get_isReady() const override;
             virtual std::future<void> Prepare() override;
-            virtual Legend BuildLegend(ArrayW<GlobalNamespace::IPreviewBeatmapLevel*> levels) const override;
-            virtual std::optional<float> GetValueFor(GlobalNamespace::IPreviewBeatmapLevel* level) const override;
+            virtual Legend BuildLegend(ArrayW<GlobalNamespace::BeatmapLevel*> levels) const override;
+            virtual std::optional<float> GetValueFor(GlobalNamespace::BeatmapLevel* level) const override;
             virtual std::string GetUnavailableReason() const override;
             std::string DefaultLegendGetter(const SongDetailsCache::Song* song) const;
         private:

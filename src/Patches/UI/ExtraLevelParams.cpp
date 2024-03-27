@@ -16,12 +16,11 @@
 #include "HMUI/HoverHint.hpp"
 #include "HMUI/CurvedTextMeshPro.hpp"
 #include "GlobalNamespace/LocalizedHoverHint.hpp"
-#include "GlobalNamespace/SharedCoroutineStarter.hpp"
-#include "GlobalNamespace/CustomDifficultyBeatmap.hpp"
+#include "bsml/shared/BSML/SharedCoroutineStarter.hpp"
 #include "GlobalNamespace/BeatmapDifficultyMethods.hpp"
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
-#include "GlobalNamespace/IDifficultyBeatmapSet.hpp"
+#include "GlobalNamespace/BeatmapKey.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData.hpp"
 #include "song-details/shared/SongDetails.hpp"
 #include "song-details/shared/Data/MapDifficulty.hpp"
@@ -83,8 +82,8 @@ namespace BetterSongList::Hooks {
         return hoverHintController.ptr();
     }
 
-    void ExtraLevelParams::StandardLevelDetailView_RefreshContent_Postfix(GlobalNamespace::StandardLevelDetailView* self, GlobalNamespace::IBeatmapLevel* level, GlobalNamespace::IDifficultyBeatmap* selectedDifficultyBeatmap, GlobalNamespace::LevelParamsPanel* levelParamsPanel) {
-        if (!get_extraUI() || !get_extraUI()->m_CachedPtr.m_value) {
+    void ExtraLevelParams::StandardLevelDetailView_RefreshContent_Postfix(GlobalNamespace::StandardLevelDetailView* self, GlobalNamespace::BeatmapLevel* level, GlobalNamespace::BeatmapKey selectedDifficultyBeatmap, GlobalNamespace::LevelParamsPanel* levelParamsPanel) {
+        if (!get_extraUI() || !get_extraUI()->m_CachedPtr) {
             extraUI = UnityEngine::Object::Instantiate(levelParamsPanel->get_gameObject(), levelParamsPanel->get_transform()->get_parent());
             UnityEngine::Object::Destroy(extraUI->GetComponent<GlobalNamespace::LevelParamsPanel*>());
 
@@ -96,15 +95,15 @@ namespace BetterSongList::Hooks {
             extraUI->get_transform()->set_localPosition(pos);
 
             fields.emplace(static_cast<Array<TMPro::TextMeshProUGUI*>*>(extraUI->GetComponentsInChildren<HMUI::CurvedTextMeshPro*>(true).convert()));
-            GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(ProcessFields()));
+            BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(ProcessFields()));
         }
 
         lastInstance = self;
 
-        auto obstaclesText = levelParamsPanel->obstaclesCountText;
+        auto obstaclesText = levelParamsPanel->_obstaclesCountText;
         obstaclesText->set_fontStyle(TMPro::FontStyles::Italic);
 
-        if (config.get_showWarningIfMapHasCrouchWallsBecauseMappersThinkSprinklingThemInRandomlyIsFun()) {
+        /*if (config.get_showWarningIfMapHasCrouchWallsBecauseMappersThinkSprinklingThemInRandomlyIsFun()) {
             obstaclesText->set_richText(true);
             auto customdiffOpt = il2cpp_utils::try_cast<GlobalNamespace::CustomDifficultyBeatmap>(selectedDifficultyBeatmap);
             if (customdiffOpt.has_value()) {
@@ -114,7 +113,7 @@ namespace BetterSongList::Hooks {
                     obstaclesText->set_text(fmt::format("<i>{}</i> <b><size=3.3><color=#FF0>!</color></size></b>", obstaclesText->get_text()));
                 }
             } else {
-                /* nothing */
+                // nothing
             }
 
         }
@@ -137,7 +136,7 @@ namespace BetterSongList::Hooks {
                     fieldsW[1]->set_text("-");
                 } else {
                     INFO("Characteristic was standard");
-                    auto hash = BeatmapUtils::GetHashOfPreview(level->i_IPreviewBeatmapLevel());
+                    auto hash = BeatmapUtils::GetHashOfPreview(level->i_BeatmapLevel());
                     INFO("Got hash: {}", hash);
                     const SongDetailsCache::Song* song = nullptr;
                     const SongDetailsCache::SongDifficulty* diff = nullptr;
@@ -158,9 +157,9 @@ namespace BetterSongList::Hooks {
                         }
                     }
                     
-                    if (hash.empty() || /* no hash */
-                        !song || /* song not found */
-                        !diff /* diff not found */
+                    if (hash.empty() || // no hash
+                        !song || // song not found
+                        !diff // diff not found
                     ) {
                         INFO("No diff|song|hash found, setting to ?");
                         fieldsW[0]->set_text("?");
@@ -202,7 +201,7 @@ namespace BetterSongList::Hooks {
             fieldsW[2]->set_text(fmt::format("{:1.1f}", njs));
 
             if (config.get_showMapJDInsteadOfOffset()) { // map jump distance
-                float jumpDistance = BetterSongList::JumpDistanceCalculator::GetJd(selectedDifficultyBeatmap->get_level()->i_IPreviewBeatmapLevel()->get_beatsPerMinute(), njs, selectedDifficultyBeatmap->get_noteJumpStartBeatOffset());
+                float jumpDistance = BetterSongList::JumpDistanceCalculator::GetJd(selectedDifficultyBeatmap->get_level()->i_BeatmapLevel()->beatsPerMinute, njs, selectedDifficultyBeatmap->get_noteJumpStartBeatOffset());
                 fieldsW[3]->set_text(fmt::format("{:1.1f}", jumpDistance));
                 INFO("Setting jumpDistance {}", jumpDistance);
             } else { // offset
@@ -212,12 +211,12 @@ namespace BetterSongList::Hooks {
             }
         } else {
             ERROR("Fields was nullptr!");
-        }
+        }*/
     }
 
     void ExtraLevelParams::UpdateState() {
         auto inst = get_lastInstance();
-        if (inst && inst->m_CachedPtr.m_value && inst->get_isActiveAndEnabled()) inst->RefreshContent();
+        if (inst && inst->m_CachedPtr && inst->get_isActiveAndEnabled()) inst->RefreshContent();
     }
 
     void ExtraLevelParams::ModifyValue(TMPro::TextMeshProUGUI* text, std::string_view hoverHint, std::string_view icon) {
@@ -233,9 +232,9 @@ namespace BetterSongList::Hooks {
 
         if (!hhint) return;
 
-        if (!get_hoverHintController() || !get_hoverHintController()->m_CachedPtr.m_value)
+        if (!get_hoverHintController() || !get_hoverHintController()->m_CachedPtr)
             hoverHintController = UnityEngine::Object::FindObjectOfType<HMUI::HoverHintController*>();
-        hhint->hoverHintController = get_hoverHintController();
+        hhint->_hoverHintController = get_hoverHintController();
         hhint->set_text(hoverHint);
     }
 

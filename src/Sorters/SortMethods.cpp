@@ -10,29 +10,30 @@
 namespace BetterSongList {
     static ComparableFunctionSorterWithLegend alphabeticalSongname(
         [](auto a, auto b) -> int {
-            return static_cast<std::u16string_view>(a->get_songName()) < (static_cast<std::u16string_view>(b->get_songName()));
+            return static_cast<std::u16string_view>(a->songName) < (static_cast<std::u16string_view>(b->songName));
         },
-        [](GlobalNamespace::IPreviewBeatmapLevel* song) -> std::string {
-            std::string songName{static_cast<std::string>(song->get_songName())};
+        [](GlobalNamespace::BeatmapLevel* song) -> std::string {
+            std::string songName{static_cast<std::string>(song->songName)};
             return songName.size() > 0 ? songName.substr(0, 1) : "";
         }
     );
 
     static PrimitiveFunctionSorterWithLegend bpm(
         [](auto song){
-            return song->get_beatsPerMinute();
+            return song->beatsPerMinute;
         },
         [](auto song){
-            return fmt::format("{}", std::round(song->get_beatsPerMinute()));
+            return fmt::format("{}", std::round(song->beatsPerMinute));
         }
     );
 
+    // TODO: Support more than one mapper, it's okay for now since most custom songs only have one mapper set
     static ComparableFunctionSorterWithLegend alphabeticalMapper(
         [](auto a, auto b) -> int {
-            return static_cast<std::u16string_view>(a->get_levelAuthorName()) < (static_cast<std::u16string_view>(b->get_levelAuthorName()));
+            return static_cast<std::u16string_view>(a->allMappers[0]) < (static_cast<std::u16string_view>(b->allMappers[0]));
         }, 
         [](auto song) -> std::string {
-            std::string levelAuthor{static_cast<std::string>(song->get_levelAuthorName())};
+            std::string levelAuthor{static_cast<std::string>(song->allMappers[0])};
             return levelAuthor.size() > 0 ? levelAuthor.substr(0, 1) : "";
         }
     );
@@ -75,9 +76,9 @@ namespace BetterSongList {
     static const float second = 1.0f / 60.0f;
 
     static PrimitiveFunctionSorterWithLegend songLength(
-        [](auto song){ return song->get_songDuration(); },
+        [](auto song){ return song->songDuration; },
         [](auto song) -> std::string {
-            float duration = song->get_songDuration();
+            float duration = song->songDuration;
             if (duration < 60) return "<1";
             return fmt::format("{}", (int)std::round(duration * second));
         }

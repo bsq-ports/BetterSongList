@@ -1,7 +1,7 @@
 #include "hooking.hpp"
 #include "config.hpp"
 
-#include "GlobalNamespace/LevelFilterParams.hpp"
+/*#include "GlobalNamespace/LevelFilterParams.hpp"
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
 #include "GlobalNamespace/BeatmapDifficultyMask.hpp"
 #include "GlobalNamespace/SongPackMask.hpp"
@@ -35,7 +35,6 @@ MAKE_AUTO_HOOK_FIND_INSTANCE(LevelFilterParams_ctor_args,
             beatmapLevelIds,
             searchText,
             filterByOwned || config.get_autoFilterUnowned(),
-            /* <-this is why we have to hook this ctor*/
             filterByNotOwned,
             filterByDifficulty,
             filteredDifficulty,
@@ -60,3 +59,4 @@ MAKE_AUTO_HOOK_FIND_INSTANCE(LevelFilterParams_ctor_0,
         LevelFilterParams_ctor_0(self);
         self->set_filterByOwned(self->get_filterByOwned() || config.get_autoFilterUnowned());
     }
+*/

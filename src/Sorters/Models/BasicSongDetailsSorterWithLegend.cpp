@@ -41,13 +41,13 @@ namespace BetterSongList {
         });
     }
 
-    ISorterWithLegend::Legend BasicSongDetailsSorterWithLegend::BuildLegend(ArrayW<GlobalNamespace::IPreviewBeatmapLevel*> levels) const {
+    ISorterWithLegend::Legend BasicSongDetailsSorterWithLegend::BuildLegend(ArrayW<GlobalNamespace::BeatmapLevel*> levels) const {
         if (
             !SongDetails::get_songDetails()->songs.get_isDataAvailable() ||
             SongDetails::get_songDetails()->songs.size() == 0
         ) return {};
 
-        return SongListLegendBuilder::BuildFor(levels, [legendValueGetter = legendValueGetter](GlobalNamespace::IPreviewBeatmapLevel* level) -> std::string {
+        return SongListLegendBuilder::BuildFor(levels, [legendValueGetter = legendValueGetter](GlobalNamespace::BeatmapLevel* level) -> std::string {
             auto h = BeatmapUtils::GetHashOfPreview(level);
             if (h.empty()) return "N/A";
 
@@ -58,7 +58,7 @@ namespace BetterSongList {
         });
     }
 
-    std::optional<float> BasicSongDetailsSorterWithLegend::GetValueFor(GlobalNamespace::IPreviewBeatmapLevel* level) const {
+    std::optional<float> BasicSongDetailsSorterWithLegend::GetValueFor(GlobalNamespace::BeatmapLevel* level) const {
         if (
             !SongDetails::get_songDetails()->songs.get_isDataAvailable() ||
             SongDetails::get_songDetails()->songs.size() == 0

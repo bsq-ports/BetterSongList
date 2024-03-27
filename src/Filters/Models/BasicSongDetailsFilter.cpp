@@ -25,7 +25,7 @@ namespace BetterSongList {
         });
     }
     
-    bool BasicSongDetailsFilter::GetValueFor(GlobalNamespace::IPreviewBeatmapLevel* level) {
+    bool BasicSongDetailsFilter::GetValueFor(GlobalNamespace::BeatmapLevel* level) {
         if (!SongDetails::get_songDetails()->songs.get_isDataAvailable()) {
             return false;
         }

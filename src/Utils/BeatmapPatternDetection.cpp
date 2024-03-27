@@ -1,7 +1,7 @@
 #include "Utils/BeatmapPatternDetection.hpp"
 
 namespace BetterSongList::BeatmapPatternDetection {
-    bool CheckForCrouchWalls(ListWrapper<BeatmapSaveDataVersion3::BeatmapSaveData::ObstacleData*> obstacles) {
+    /*bool CheckForCrouchWalls(ListW<BeatmapSaveDataVersion3::BeatmapSaveData::ObstacleData*> obstacles) {
         if (!obstacles || obstacles.size() == 0) return false;
 
         float wallExistence[2] = {0, 0};
@@ -36,5 +36,5 @@ namespace BetterSongList::BeatmapPatternDetection {
         }
 
         return false;
-    }
+    }*/
 }

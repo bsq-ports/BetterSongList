@@ -4,26 +4,21 @@
 
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Sprite.hpp"
-#include "GlobalNamespace/IBeatmapLevelPackCollection.hpp"
-#include "GlobalNamespace/IBeatmapLevelPack.hpp"
 #include "GlobalNamespace/BeatmapLevelPack.hpp"
-#include "GlobalNamespace/IBeatmapLevelCollection.hpp"
-#include "GlobalNamespace/IBeatmapLevel.hpp"
-#include "GlobalNamespace/IDifficultyBeatmap.hpp"
+#include "GlobalNamespace/BeatmapLevelPack.hpp"
+#include "GlobalNamespace/BeatmapLevel.hpp"
+#include "GlobalNamespace/BeatmapKey.hpp"
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
-#include "GlobalNamespace/PreviewDifficultyBeatmapSet.hpp"
 #include "Utils/PlaylistUtils.hpp"
 
 #include "logging.hpp"
 #include "config.hpp"
 
-#include "songloader/include/Utils/FindComponentsUtils.hpp"
-
 namespace BetterSongList::Hooks {
     std::string RestoreLevelSelection::restoredPackId;
-    SafePtr<GlobalNamespace::IBeatmapLevelPack> RestoreLevelSelection::restoredPack;
+    SafePtr<GlobalNamespace::BeatmapLevelPack> RestoreLevelSelection::restoredPack;
 
-    GlobalNamespace::IBeatmapLevelPack* RestoreLevelSelection::get_restoredPack() {
+    GlobalNamespace::BeatmapLevelPack* RestoreLevelSelection::get_restoredPack() {
         if (!restoredPack) {
             return nullptr;
         }
@@ -31,7 +26,7 @@ namespace BetterSongList::Hooks {
     }
     void RestoreLevelSelection::LevelSelectionFlowCoordinator_DidActivate_Prefix(GlobalNamespace::LevelSelectionFlowCoordinator::State*& startState, bool firstActivation) {
         auto startPack = startState ? startState->beatmapLevelPack : nullptr;
-        auto startPackId = startPack ? startPack->get_packID() : nullptr;
+        auto startPackId = startPack ? startPack->packID : nullptr;
         restoredPackId = startPackId ? static_cast<std::string>(startPackId) : "";
         if (startState) {
             return;
@@ -40,9 +35,9 @@ namespace BetterSongList::Hooks {
         INFO("restored Pack Id: {}", restoredPackId);
         auto restoreCategory = config.get_lastCategory();
         auto& restoreLevel = config.get_lastSong();
-        GlobalNamespace::IPreviewBeatmapLevel* m = nullptr;
+        GlobalNamespace::BeatmapLevel* m = nullptr;
 
-        if (!restoreLevel.empty()) {
+        /*if (!restoreLevel.empty()) {
             auto bm = RuntimeSongLoader::FindComponentsUtils::GetBeatmapLevelsModel();
             auto levels = bm->loadedPreviewBeatmapLevels;
 
@@ -52,17 +47,17 @@ namespace BetterSongList::Hooks {
         LoadPackFromCollectionName();
 
         startState = GlobalNamespace::LevelSelectionFlowCoordinator::State::New_ctor(
-            System::Nullable_1<LevelCategory>(restoreCategory, true),
+            System::Nullable_1<LevelCategory>(true, restoreCategory),
             get_restoredPack(),
             m,
             nullptr
-        );
+        );*/
     }
 
     void RestoreLevelSelection::LoadPackFromCollectionName() {
         INFO("Loading pack from name");
         if (get_restoredPack()) {
-            auto packID = get_restoredPack()->get_packID();
+            auto packID = get_restoredPack()->packID;
             if (packID && packID == config.get_lastPack()) {
                 return;
             }
@@ -81,6 +76,6 @@ namespace BetterSongList::Hooks {
         if (levelPackIdToBeSelectedAfterPresent) return;
         LoadPackFromCollectionName();
 
-        levelPackIdToBeSelectedAfterPresent = get_restoredPack() ? get_restoredPack()->get_packID() : nullptr;
+        levelPackIdToBeSelectedAfterPresent = get_restoredPack() ? get_restoredPack()->packID : nullptr;
     }
 }

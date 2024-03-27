@@ -1,7 +1,7 @@
 #include "hooking.hpp"
 
 #include "Patches/ImproveBasegameSearch.hpp"
-#include "GlobalNamespace/BeatmapLevelFilterModel.hpp"
+/*#include "GlobalNamespace/BeatmapLevelFilterModel.hpp"
 
 // from ImproveBasegameSearch
 MAKE_AUTO_HOOK_ORIG_MATCH(BeatmapLevelFilterModel_LevelContainsText, &GlobalNamespace::BeatmapLevelFilterModel::LevelContainsText, bool, ::GlobalNamespace::IPreviewBeatmapLevel* beatmapLevel, ArrayW<::StringW> searchTexts) {
@@ -11,4 +11,4 @@ MAKE_AUTO_HOOK_ORIG_MATCH(BeatmapLevelFilterModel_LevelContainsText, &GlobalName
     }
 
     return BeatmapLevelFilterModel_LevelContainsText(beatmapLevel, searchTexts);
-}
+}*/

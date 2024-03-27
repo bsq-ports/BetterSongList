@@ -2,14 +2,14 @@
 #include "config.hpp"
 
 namespace BetterSongList::Hooks {
-    bool ImproveBasegameSearch::BeatmapLevelFilterModel_LevelContainsText_Prefix(GlobalNamespace::IPreviewBeatmapLevel* beatmapLevel, ArrayW<StringW>& searchTexts, bool& result) {
-        if (!config.get_modBasegameSearch()) return true;
+
+    bool filterLiver(GlobalNamespace::BeatmapLevel* level, ArrayW<StringW>& searchTexts) {
+        bool result = false;
         
-        //searchTexts.Any(x => x.Length > 2 && beatmapLevel.levelAuthorName.IndexOf(x, 0, StringComparison.CurrentCultureIgnoreCase) != -1)
         for (auto s : searchTexts) {
             auto str = static_cast<std::u16string_view>(s);
             if (str.size() > 2) {
-                auto authorName = static_cast<std::u16string_view>(beatmapLevel->get_levelAuthorName());
+                auto authorName = static_cast<std::u16string_view>(level->songAuthorName);
 
                 // try to find the string in author name
                 auto match = std::search(authorName.begin(), authorName.end(), str.begin(), str.end(), [](char16_t c1, char16_t c2) {
@@ -24,10 +24,27 @@ namespace BetterSongList::Hooks {
             }
         }
 
-        if (searchTexts.Length() > 1) {
+        if (searchTexts.size() > 1) {
             searchTexts = ArrayW<StringW>(il2cpp_array_size_t(1));
-            searchTexts[0] = Il2CppString::Join(" ", searchTexts.convert());
+            //searchTexts[0] = Il2CppString::Join(" ", searchTexts.convert());
         }
+
+        return result;
+    }
+    bool ImproveBasegameSearch::LevelFilter_FilterLevelByText_Prefix(System::Collections::Generic::List_1<GlobalNamespace::BeatmapLevel*>* levels, ArrayW<StringW>& searchTexts, System::Collections::Generic::List_1<GlobalNamespace::BeatmapLevel*>*& result) {
+        if (!config.get_modBasegameSearch()) return true;
+
+        ListW<GlobalNamespace::BeatmapLevel*> resultLevels = ListW<GlobalNamespace::BeatmapLevel*>();
+        
+        for (size_t i = 0; i < levels->Count; i++)
+        {
+            auto level = levels->get_Item(i);
+            if (filterLiver(level, searchTexts)) {
+                resultLevels->Add(level);
+            }
+        }
+        
+        result = resultLevels;
 
         return true;
     }
