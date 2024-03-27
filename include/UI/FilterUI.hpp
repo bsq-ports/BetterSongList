@@ -20,6 +20,8 @@ DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject,
     DECLARE_INSTANCE_FIELD(UnityEngine::RectTransform*, root);
     DECLARE_INSTANCE_FIELD(BSML::DropdownListSetting*, sortDropDown);
     DECLARE_INSTANCE_FIELD(BSML::DropdownListSetting*, filterDropDown);
+    DECLARE_INSTANCE_FIELD(ListW<StringW>, sortOptionsList);
+    DECLARE_INSTANCE_FIELD(ListW<StringW>, filterOptionsList);
     DECLARE_INSTANCE_FIELD(bool, warningLoadInProgress);
     DECLARE_INSTANCE_FIELD(HMUI::ImageView*, filterLoadingIndicator);
     DECLARE_INSTANCE_FIELD(BSML::ClickableImage*, sortDirection);
@@ -56,9 +58,6 @@ DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject,
         static SafePtr<FilterUI> instance;
         static std::map<std::string, BetterSongList::ISorter*> sortOptions;
         static std::map<std::string, BetterSongList::IFilter*> filterOptions;
-
-        ListW<StringW> sortOptionsList;
-        ListW<StringW> filterOptionsList;
         
         std::queue<std::string> warnings;
 

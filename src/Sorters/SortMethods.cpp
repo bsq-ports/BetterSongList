@@ -30,10 +30,12 @@ namespace BetterSongList {
     // TODO: Support more than one mapper, it's okay for now since most custom songs only have one mapper set
     static ComparableFunctionSorterWithLegend alphabeticalMapper(
         [](auto a, auto b) -> int {
-            return static_cast<std::u16string_view>(a->allMappers[0]) < (static_cast<std::u16string_view>(b->allMappers[0]));
+            StringW mappera = a->allMappers.size() > 0 ? a->allMappers[0] : "";
+            StringW mapperb = b->allMappers.size() > 0 ? b->allMappers[0] : "";
+            return static_cast<std::u16string_view>(mappera) < (static_cast<std::u16string_view>(mapperb));
         }, 
         [](auto song) -> std::string {
-            std::string levelAuthor{static_cast<std::string>(song->allMappers[0])};
+            std::string levelAuthor{static_cast<std::string>(song->allMappers.size() > 0 ? song->allMappers[0] : "")};
             return levelAuthor.size() > 0 ? levelAuthor.substr(0, 1) : "";
         }
     );

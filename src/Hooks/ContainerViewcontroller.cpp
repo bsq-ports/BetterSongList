@@ -30,7 +30,8 @@ MAKE_AUTO_HOOK_ORIG_MATCH(ContainerViewController_RemoveViewControllers, &HMUI::
     System::Action* finishedCallback,
     AnimationLayouterAction_3 animationLayouter,
     bool immediately) {
-    self->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(RemoveViewControllersCoroutine(self, viewControllers, finishedCallback, animationLayouter, immediately)));
+    //self->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(RemoveViewControllersCoroutine(self, viewControllers, finishedCallback, animationLayouter, immediately)));
+    ContainerViewController_RemoveViewControllers(self, viewControllers, finishedCallback, animationLayouter, immediately);
     // not calling ORIG on purpose!
 }
 
