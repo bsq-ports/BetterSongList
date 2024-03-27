@@ -11,6 +11,8 @@
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
 #include "Utils/PlaylistUtils.hpp"
 
+#include "songcore/shared/SongCore.hpp"
+
 #include "logging.hpp"
 #include "config.hpp"
 
@@ -37,11 +39,8 @@ namespace BetterSongList::Hooks {
         auto& restoreLevel = config.get_lastSong();
         GlobalNamespace::BeatmapLevel* m = nullptr;
 
-        /*if (!restoreLevel.empty()) {
-            auto bm = RuntimeSongLoader::FindComponentsUtils::GetBeatmapLevelsModel();
-            auto levels = bm->loadedPreviewBeatmapLevels;
-
-            levels->TryGetValue(restoreLevel, byref(m));
+        if (!restoreLevel.empty()) {
+            m = SongCore::API::Loading::GetLevelByLevelID(restoreLevel);
         }
 
         LoadPackFromCollectionName();
@@ -51,7 +50,7 @@ namespace BetterSongList::Hooks {
             get_restoredPack(),
             m,
             nullptr
-        );*/
+        );
     }
 
     void RestoreLevelSelection::LoadPackFromCollectionName() {

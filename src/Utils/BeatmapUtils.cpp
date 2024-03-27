@@ -1,13 +1,13 @@
 #include "Utils/BeatmapUtils.hpp"
-
+#include "logging.hpp"
 
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
 
 namespace BetterSongList::BeatmapUtils {
     std::string GetHashOfPreview(GlobalNamespace::BeatmapLevel* level) {
         if (!level) return "";
-
         auto levelId = static_cast<std::string>(level->levelID);
+        INFO("Hash Of Preview {} {}", level->levelID, levelId.size());
         if (levelId.size() < 53) return "";
         if (levelId[12] != '_') return "";
         return levelId.substr(13, 40);

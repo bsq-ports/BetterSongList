@@ -3,8 +3,10 @@
 #include "logging.hpp"
 
 #include "UnityEngine/Object.hpp"
+#include "UnityEngine/Resources.hpp"
 #include "GlobalNamespace/BeatmapLevelPack.hpp"
 #include "GlobalNamespace/BeatmapLevelsModel.hpp"
+#include "System/Collections/Generic/IReadOnlyList_1.hpp"
 
 #include "songcore/shared/SongCore.hpp"
 
@@ -40,13 +42,19 @@ namespace BetterSongList::PlaylistUtils {
         }
 
         if (!get_builtinPacks()) {
-            //auto levelsModel = RuntimeSongLoader::FindComponentsUtils::GetBeatmapLevelsModel();
-            //auto collection = levelsModel->get_allLoadedBeatmapLevelWithoutCustomLevelPackCollection();
-            //auto packs = collection->get_beatmapLevelPacks();
             builtinPacks = Dictionary<StringW, GlobalNamespace::BeatmapLevelPack*>::New_ctor();
+            /*auto levelsModels = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::BeatmapLevelsModel*>();
+            if (levelsModels) {
+                auto levelModel = levelsModels.front();
+                auto ostPacks = levelModel.value()->ostAndExtrasBeatmapLevelsRepository->beatmapLevelPacks->i___System__Collections__Generic__IEnumerable_1_T_();
+                auto dlcPacks = levelModel.value()->dlcBeatmapLevelsRepository->beatmapLevelPacks->i___System__Collections__Generic__IEnumerable_1_T_();
+                auto packs = ListW<GlobalNamespace::BeatmapLevelPack*>::New();
+                packs->AddRange(ostPacks);
+                packs->AddRange(dlcPacks);
 
-            /*for (auto p : packs) {
-                builtinPacks->Add(p->get_packID(), p);
+                for (auto p : packs) {
+                    builtinPacks->Add(p->packID, p);
+                }
             }*/
         }
 
