@@ -33,36 +33,25 @@ namespace BetterSongList {
             DEBUG("Level was not custom level!");
             return invert;
         }
-        /*auto saveData = customLevel->get_standardLevelInfoSaveData();
+        auto saveData = customLevel->get_standardLevelInfoSaveData();
         if (!saveData) {
             DEBUG("Level had no save data!");
             return invert;
         }
 
-        if (customSaveData->doc.use_count() <= 0) {
-            DEBUG("Document had use count of 0!");
-            return invert;
-        }
+        auto sets = saveData->_difficultyBeatmapSets;
 
-        // :smilew:
-        auto difficultyBeatmapSetsitr = customSaveData->doc->FindMember(u"_difficultyBeatmapSets");
-        if (difficultyBeatmapSetsitr != customSaveData->doc->MemberEnd()) {
-            auto setArr = difficultyBeatmapSetsitr->value.GetArray();
-            for (auto& beatmapCharacteristicItr : setArr) {
-                auto difficultyBeatmaps = beatmapCharacteristicItr.FindMember(u"_difficultyBeatmaps");
-                auto beatmaps = difficultyBeatmaps->value.GetArray();
-                for (auto& beatmap : beatmaps) {
-                    auto customDataItr = beatmap.FindMember(u"_customData");
-                    if (customDataItr != beatmap.MemberEnd()) {
-                        auto& customData = customDataItr->value;
-                        auto requirementsItr = customData.FindMember(u"_requirements");
-                        if (requirementsItr != customData.MemberEnd()) {
-                            if (requirementsItr->value.Size() > 0) return !invert;
-                        }
-                    }
+        for (auto set : sets) {
+            auto chara = set->_beatmapCharacteristicName;
+            auto diffs = set->_difficultyBeatmaps;
+            for (auto diff : diffs) {
+                auto detailsOpt = saveData->TryGetCharacteristicAndDifficulty(chara, diff->_difficultyRank);
+                if(detailsOpt) {
+                    auto details = detailsOpt.value();
+                    if (details.get().requirements.size() > 0) return !invert;
                 }
             }
-        }*/
+        }
         
         DEBUG("Custom Data contained 0 requirements!");
         return invert;

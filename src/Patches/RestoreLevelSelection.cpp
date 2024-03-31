@@ -45,12 +45,18 @@ namespace BetterSongList::Hooks {
 
         LoadPackFromCollectionName();
         if (m) {
-            startState = GlobalNamespace::LevelSelectionFlowCoordinator::State::New_ctor(
-                System::Nullable_1<LevelCategory>(true, restoreCategory),
-                get_restoredPack(),
-                m,
-                nullptr
+
+            auto levelCategory = System::Nullable_1<GlobalNamespace::SelectLevelCategoryViewController::LevelCategory>();
+            levelCategory.value = restoreCategory;
+            levelCategory.hasValue = true;
+
+            auto state = GlobalNamespace::LevelSelectionFlowCoordinator::State::New_ctor(
+                    get_restoredPack(),
+                    static_cast<GlobalNamespace::BeatmapLevel *>(m)
             );
+
+            state->___levelCategory = levelCategory;
+            startState = state;
         }     
     }
 

@@ -22,6 +22,7 @@
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
 #include "GlobalNamespace/BeatmapKey.hpp"
 #include "GlobalNamespace/StandardLevelInfoSaveData.hpp"
+#include "GlobalNamespace/BeatmapBasicData.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData.hpp"
 #include "System/IO/File.hpp"
 #include "song-details/shared/SongDetails.hpp"
@@ -193,47 +194,16 @@ namespace BetterSongList::Hooks {
                 fieldsW[0]->set_text("...");
                 fieldsW[1]->set_text("...");
             }
-            
-            fieldsW[2]->set_text("?");
-            fieldsW[3]->set_text("?");
 
-            /*auto customBeatmapLevelOpt = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(level);
+            auto basicData = level->GetDifficultyBeatmapData(selectedDifficultyBeatmap.beatmapCharacteristic, selectedDifficultyBeatmap.difficulty);
+            auto customBeatmapLevelOpt = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(level);
             if (customBeatmapLevelOpt) {
-                auto customBeatmapLevel = customBeatmapLevelOpt.value();
-                auto infoPath = std::string(customBeatmapLevel->customLevelPath) + "/info.dat";
-                INFO("infoPath {}", infoPath);
-                auto standardSaveData = GlobalNamespace::StandardLevelInfoSaveData::DeserializeFromJSONString(System::IO::File::ReadAllText(infoPath));
-                auto diffSets = standardSaveData->get_difficultyBeatmapSets();
-                for (auto set : diffSets) {
-                    if (set->beatmapCharacteristicName == selectedDifficultyBeatmap.beatmapCharacteristic->serializedName) {
-                        auto diffs = set->difficultyBeatmaps;
-                        for (auto diff : diffs) {
-                            if (diff->difficultyRank == selectedDifficultyBeatmap.difficulty.value__) {
-                                auto njs = diff->noteJumpMovementSpeed;
-                                if (njs == 0) {
-                                    njs = GlobalNamespace::BeatmapDifficultyMethods::NoteJumpMovementSpeed(selectedDifficultyBeatmap.difficulty);
-                                }
-
-                                INFO("Setting njs {}", njs);
-                                fieldsW[2]->set_text(fmt::format("{:1.1f}", njs));
-
-                                if (config.get_showMapJDInsteadOfOffset()) { // map jump distance
-                                    float jumpDistance = BetterSongList::JumpDistanceCalculator::GetJd(level->beatsPerMinute, njs, diff->noteJumpStartBeatOffset);
-                                    fieldsW[3]->set_text(fmt::format("{:1.1f}", jumpDistance));
-                                    INFO("Setting jumpDistance {}", jumpDistance);
-                                } else { // offset
-                                    float offset = diff->noteJumpStartBeatOffset;
-                                    fieldsW[3]->set_text(fmt::format("{:1.1f}", offset));
-                                    INFO("Setting offset  {}", offset);
-                                }
-                            }
-                        }
-                    }
-                }
+                fieldsW[2]->set_text(fmt::format("{:1.1f}", basicData->noteJumpMovementSpeed));
+                fieldsW[3]->set_text(fmt::format("{:1.1f}", basicData->noteJumpStartBeatOffset));
             } else {
                 fieldsW[2]->set_text("?");
                 fieldsW[3]->set_text("?");
-            }*/
+            }
         } else {
             ERROR("Fields was nullptr!");
         }

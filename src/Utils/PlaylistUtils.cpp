@@ -43,19 +43,30 @@ namespace BetterSongList::PlaylistUtils {
 
         if (!get_builtinPacks()) {
             builtinPacks = Dictionary<StringW, GlobalNamespace::BeatmapLevelPack*>::New_ctor();
-            /*auto levelsModels = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::BeatmapLevelsModel*>();
+            INFO(":3 1");
+            auto levelsModels = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::BeatmapLevelsModel*>();
+            INFO(":3 2");
             if (levelsModels) {
+                INFO(":3 3");
                 auto levelModel = levelsModels.front();
+                INFO(":3 4");
                 auto ostPacks = levelModel.value()->ostAndExtrasBeatmapLevelsRepository->beatmapLevelPacks->i___System__Collections__Generic__IEnumerable_1_T_();
+                INFO(":3 5");
                 auto dlcPacks = levelModel.value()->dlcBeatmapLevelsRepository->beatmapLevelPacks->i___System__Collections__Generic__IEnumerable_1_T_();
+                INFO(":3 6");
                 auto packs = ListW<GlobalNamespace::BeatmapLevelPack*>::New();
+                INFO(":3 7");
                 packs->AddRange(ostPacks);
+                INFO(":3 8");
                 packs->AddRange(dlcPacks);
+                INFO(":3 9");
 
                 for (auto p : packs) {
+                    INFO(":3 10 {}", p->packID);
                     builtinPacks->Add(p->packID, p);
                 }
-            }*/
+                INFO(":3 11");
+            }
         }
 
         GlobalNamespace::BeatmapLevelPack* v = nullptr;
