@@ -33,7 +33,6 @@ namespace BetterSongList {
     }
 
     void FolderDateSorter::GatherFolderInfoThread(bool fullReload) {
-        std::string fpath = "/info.dat";
         
         auto levels = SongCore::API::Loading::GetAllLevels();
 
@@ -43,7 +42,7 @@ namespace BetterSongList {
             if (itr != songTimes.end() && !fullReload) continue;
 
             struct stat fileStat = {0};
-            std::string filePath = std::string(level->get_customLevelPath()) + fpath;
+            std::string filePath = std::string(level->get_customLevelPath());
             if (stat(filePath.c_str(), &fileStat) == 0) {
                 songTimes[levelID] = fileStat.st_ctim.tv_sec;
             }

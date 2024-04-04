@@ -4,6 +4,10 @@
 #include "GlobalNamespace/PlayerData.hpp"
 #include "GlobalNamespace/PlayerLevelStatsData.hpp"
 #include "bsml/shared/BSML/SharedCoroutineStarter.hpp"
+#include "System/Collections/Generic/List_1.hpp"
+#include "System/Collections/Generic/Dictionary_2.hpp"
+
+#include "logging.hpp"
 
 #include "custom-types/shared/coroutine.hpp"
 
@@ -37,8 +41,12 @@ namespace BetterSongList::LocalScoresUtils {
         }
 
         auto playerDataModel = get_playerDataModel();
+
         auto playerData = playerDataModel ? playerDataModel->playerData : nullptr;
-        ListW<GlobalNamespace::PlayerLevelStatsData*> levelData{playerData ? playerData->levelsStatsData : nullptr};
+        auto levelData = ListW<GlobalNamespace::PlayerLevelStatsData*>::New();
+        auto stats = playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr;
+        INFO("{}", fmt::ptr(stats));
+        levelData->AddRange(stats);
         if (!levelData) {
             return false;
         }
@@ -66,13 +74,19 @@ namespace BetterSongList::LocalScoresUtils {
         if (isLoadingScores || get_hasScores()) return;
         isLoadingScores = true;
         auto playerDataModel = get_playerDataModel();
+        INFO("{}", fmt::ptr(playerDataModel));
         auto playerData = playerDataModel ? playerDataModel->get_playerData() : nullptr;
+        INFO("{}", fmt::ptr(playerData));
         auto levelData = ListW<GlobalNamespace::PlayerLevelStatsData*>::New();
-        levelData->AddRange(playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr);
+        auto stats = playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr;
+        INFO("{}", fmt::ptr(stats));
+        levelData->AddRange(stats);
         
         if (levelData) {
             std::thread([](ListW<GlobalNamespace::PlayerLevelStatsData*> levelData){
+                INFO("x1");
                 for (auto x : levelData) {
+                    INFO("{}", fmt::ptr(x));
                     if (!x->validScore) continue;
                     auto levelId = static_cast<std::string>(x->levelID);
                     if (playedMaps.find(levelId) == playedMaps.end()) {

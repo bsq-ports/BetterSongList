@@ -47,5 +47,4 @@ namespace IncludedAssets {
 	DECLARE_FILE(DoubleArrowIcon_png)
 	DECLARE_FILE(MainUI_bsml)
 	DECLARE_FILE(Settings_bsml)
-	DECLARE_FILE(SongDeleteConfirm_bsml)
 }

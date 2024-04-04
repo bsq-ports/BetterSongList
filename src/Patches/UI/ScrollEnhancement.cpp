@@ -85,7 +85,10 @@ namespace BetterSongList::Hooks {
         return newBtn;
     }
 
+    static HMUI::TableView* storedTable = nullptr;
+
     custom_types::Helpers::Coroutine ScrollEnhancement::SetupExtraScrollButtons(HMUI::TableView* table, UnityEngine::Transform* a) {
+        storedTable = table;
         co_yield reinterpret_cast<System::Collections::IEnumerator*>(UnityEngine::WaitForEndOfFrame::New_ctor());
 
         auto r = table->get_transform()->get_parent()->get_parent().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
@@ -115,12 +118,12 @@ namespace BetterSongList::Hooks {
 
         
 
-        auto btnUpFast = BuildButton(button, MOD_ID "_double_arrow", 0, -90, [table](){Scroll(table, 0.1f, -1);});
-        auto btnDownFast = BuildButton(button, MOD_ID "_double_arrow", 0.86f, 90, [table](){Scroll(table, 0.1f, 1);});
+        auto btnUpFast = BuildButton(button, MOD_ID "_double_arrow", 0, -90, [](){Scroll(storedTable, 0.1f, -1);});
+        auto btnDownFast = BuildButton(button, MOD_ID "_double_arrow", 0.86f, 90, [](){Scroll(storedTable, 0.1f, 1);});
 
         buttons[0] = btnUpFast->get_gameObject();
-        buttons[1] = BuildButton(button, "#HeightIcon", 0.09f, 0, [table](){Scroll(table, 1.0f, 0);})->get_gameObject();
-        buttons[2] = BuildButton(button, "#HeightIcon", 0.77f, 180, [table](){Scroll(table, 1.0f, 1);})->get_gameObject();
+        buttons[1] = BuildButton(button, "#HeightIcon", 0.09f, 0, [](){Scroll(storedTable, 1.0f, 0);})->get_gameObject();
+        buttons[2] = BuildButton(button, "#HeightIcon", 0.77f, 180, [](){Scroll(storedTable, 1.0f, 1);})->get_gameObject();
         buttons[3] = btnDownFast->get_gameObject();
         co_yield nullptr;
         UpdateState();

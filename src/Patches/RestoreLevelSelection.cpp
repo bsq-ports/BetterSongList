@@ -9,6 +9,9 @@
 #include "GlobalNamespace/BeatmapLevel.hpp"
 #include "GlobalNamespace/BeatmapKey.hpp"
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
+#include "GlobalNamespace/LevelSelectionNavigationController.hpp"
+#include "GlobalNamespace/LevelFilteringNavigationController.hpp"
+#include "GlobalNamespace/BeatmapLevelsModel.hpp"
 #include "Utils/PlaylistUtils.hpp"
 
 #include "songcore/shared/SongCore.hpp"
@@ -26,7 +29,7 @@ namespace BetterSongList::Hooks {
         }
         return restoredPack.ptr();
     }
-    void RestoreLevelSelection::LevelSelectionFlowCoordinator_DidActivate_Prefix(GlobalNamespace::LevelSelectionFlowCoordinator::State*& startState, bool firstActivation) {
+    void RestoreLevelSelection::LevelSelectionFlowCoordinator_DidActivate_Prefix(GlobalNamespace::LevelSelectionFlowCoordinator* self, GlobalNamespace::LevelSelectionFlowCoordinator::State*& startState, bool firstActivation) {
         auto startPack = startState ? startState->beatmapLevelPack : nullptr;
         auto startPackId = startPack ? startPack->packID : nullptr;
         restoredPackId = startPackId ? static_cast<std::string>(startPackId) : "";
@@ -38,12 +41,13 @@ namespace BetterSongList::Hooks {
         auto restoreCategory = config.get_lastCategory();
         auto& restoreLevel = config.get_lastSong();
         GlobalNamespace::BeatmapLevel* m = nullptr;
-
+        
+        GlobalNamespace::BeatmapLevelsModel* levelsModel = self->levelSelectionNavigationController->_levelFilteringNavigationController->_beatmapLevelsModel;
         if (!restoreLevel.empty()) {
-            m = SongCore::API::Loading::GetLevelByLevelID(restoreLevel);
+            m = levelsModel->GetBeatmapLevel(levelsModel);
         }
 
-        LoadPackFromCollectionName();
+        LoadPackFromCollectionName(levelsModel);
         if (m) {
 
             auto levelCategory = System::Nullable_1<GlobalNamespace::SelectLevelCategoryViewController::LevelCategory>();
@@ -60,7 +64,7 @@ namespace BetterSongList::Hooks {
         }     
     }
 
-    void RestoreLevelSelection::LoadPackFromCollectionName() {
+    void RestoreLevelSelection::LoadPackFromCollectionName(GlobalNamespace::BeatmapLevelsModel* levelsModel) {
         INFO("Loading pack from name");
         if (get_restoredPack()) {
             auto packID = get_restoredPack()->packID;
@@ -75,12 +79,13 @@ namespace BetterSongList::Hooks {
             return;
         }
 
-        restoredPack.emplace(PlaylistUtils::GetPack(config.get_lastPack()));
+        restoredPack.emplace(levelsModel->GetLevelPackForLevelId(config.get_lastPack()));
     }
 
-    void RestoreLevelSelection::LevelFilteringNavigationController_ShowPacksInSecondChildController_Prefix(StringW& levelPackIdToBeSelectedAfterPresent) {
+    void RestoreLevelSelection::LevelFilteringNavigationController_ShowPacksInSecondChildController_Prefix(GlobalNamespace::LevelFilteringNavigationController* self, StringW& levelPackIdToBeSelectedAfterPresent) {
         if (levelPackIdToBeSelectedAfterPresent) return;
-        LoadPackFromCollectionName();
+        auto levelsModel = self->_beatmapLevelsModel;
+        LoadPackFromCollectionName(levelsModel);
 
         levelPackIdToBeSelectedAfterPresent = get_restoredPack() ? get_restoredPack()->packID : nullptr;
     }

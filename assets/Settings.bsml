@@ -6,10 +6,6 @@
 			</horizontal>
 			<vertical horizontal-fit='Unconstrained' preferred-height='80' child-expand-height='false'>
 					<toggle-setting
-						text='Allow deleting WIPs' apply-on-change='true' value='allowWipDelete'
-						hover-hint='Should Work in Progress maps be deleteable?'
-				/>
-					<toggle-setting
 						text='Auto-Filter Unowned DLC Songs' apply-on-change='true' value='autoFilterUnowned'
 						hover-hint='Automatically filter out Unowned songs from the "All Songs" / "Filter" tab'
 				/>
@@ -28,10 +24,6 @@
 					<toggle-setting
 						text='Extend Basegame scrollbar' apply-on-change='true' value='extendSongScrollbar'
 						hover-hint='Adds Far-Scroll and Jump to Top / Bottom buttons to Scrollbar'
-				/>
-					<toggle-setting
-						text='Show map JD instead of Offset' apply-on-change='true' value='showMapJDInsteadOfOffset'
-						hover-hint='Will display the maps JD instead of its configured offset'
 				/>
 					<slider-setting
 						text='PP Accuracy Scale (SS Only)' apply-on-change='true' value='accuracyMultiplier' min='0.2' max='2' increment='0.02'
