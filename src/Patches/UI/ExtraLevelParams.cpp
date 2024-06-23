@@ -115,7 +115,7 @@ namespace BetterSongList::Hooks {
     }
 
     void ExtraLevelParams::StandardLevelDetailView_RefreshContent_Postfix(GlobalNamespace::StandardLevelDetailView* self, GlobalNamespace::BeatmapLevel* level, GlobalNamespace::BeatmapKey selectedDifficultyBeatmap, GlobalNamespace::LevelParamsPanel* levelParamsPanel) {
-        if (!get_extraUI() || !get_extraUI()->m_CachedPtr) {
+        if (!get_extraUI() || !get_extraUI()->___m_CachedPtr.m_value) {
             extraUI = UnityEngine::Object::Instantiate(levelParamsPanel->get_gameObject(), levelParamsPanel->get_transform()->get_parent());
             UnityEngine::Object::Destroy(extraUI->GetComponent<GlobalNamespace::LevelParamsPanel*>());
             auto linker = levelParamsPanel->get_gameObject()->AddComponent<BetterSongList::CanvasGroupLinker*>();
@@ -126,7 +126,7 @@ namespace BetterSongList::Hooks {
                 auto selectedDifficultyBeatmap = ExtraLevelParams::get_lastInstance()->get_beatmapKey();
                 auto levelParamsPanel = ExtraLevelParams::get_lastInstance()->____levelParamsPanel;
 
-                auto obstaclesText = levelParamsPanel->_obstaclesCountText;
+                auto obstaclesText = levelParamsPanel->____obstaclesCountText;
                 auto txt = obstaclesText->get_text();
                 int obstacleCount = 0;
                 std::istringstream(static_cast<std::string>(txt)) >> obstacleCount;
@@ -237,7 +237,7 @@ namespace BetterSongList::Hooks {
 
             auto customBeatmapLevelOpt = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(level);
             if (customBeatmapLevelOpt) {
-                fieldsW[2]->set_text(fmt::format("{:1.1f}", basicData->noteJumpMovementSpeed));
+                fieldsW[2]->set_text(fmt::format("{:1.1f}", basicData->___noteJumpMovementSpeed));
             } else {
                 fieldsW[2]->set_text("?");
             }
@@ -248,7 +248,7 @@ namespace BetterSongList::Hooks {
 
     void ExtraLevelParams::UpdateState() {
         auto inst = get_lastInstance();
-        if (inst && inst->m_CachedPtr && inst->get_isActiveAndEnabled()) inst->RefreshContent();
+        if (inst && inst->___m_CachedPtr.m_value && inst->get_isActiveAndEnabled()) inst->RefreshContent();
     }
 
     void ExtraLevelParams::ModifyValue(TMPro::TextMeshProUGUI* text, std::string_view hoverHint, std::string_view icon) {
@@ -265,9 +265,9 @@ namespace BetterSongList::Hooks {
 
         if (!hhint) return;
 
-        if (!get_hoverHintController() || !get_hoverHintController()->m_CachedPtr)
+        if (!get_hoverHintController() || !get_hoverHintController()->___m_CachedPtr.m_value)
             hoverHintController = UnityEngine::Object::FindObjectOfType<HMUI::HoverHintController*>();
-        hhint->_hoverHintController = get_hoverHintController();
+        hhint->____hoverHintController = get_hoverHintController();
         hhint->set_text(hoverHint);
     }
 

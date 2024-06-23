@@ -33,7 +33,7 @@ namespace BetterSongList::Hooks {
 
     void ScrollEnhancement::GameRestart() {
         for (auto& btn : buttons) {
-            if (btn && btn.ptr() && btn->m_CachedPtr) {
+            if (btn && btn.ptr() && btn->___m_CachedPtr.m_value) {
                 UnityEngine::Object::DestroyImmediate(btn.ptr());
             }
             btn = nullptr;
@@ -50,7 +50,7 @@ namespace BetterSongList::Hooks {
 
     void ScrollEnhancement::UpdateState() {
         for (auto& btn : buttons) {
-            if (btn && btn.ptr() && btn->m_CachedPtr) {
+            if (btn && btn.ptr() && btn->___m_CachedPtr.m_value) {
                 btn->SetActive(config.get_extendSongScrollbar());
             }
         }

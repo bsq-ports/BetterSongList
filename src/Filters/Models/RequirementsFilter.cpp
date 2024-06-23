@@ -33,19 +33,25 @@ namespace BetterSongList {
             DEBUG("Level was not custom level!");
             return invert;
         }
-        auto saveData = customLevel->get_standardLevelInfoSaveData();
+
+        auto saveData = customLevel->get_standardLevelInfoSaveDataV2().value_or(nullptr);
         if (!saveData) {
             DEBUG("Level had no save data!");
             return invert;
         }
 
-        auto sets = saveData->_difficultyBeatmapSets;
+        auto sets = saveData->____difficultyBeatmapSets;
 
         for (auto set : sets) {
-            auto chara = set->_beatmapCharacteristicName;
-            auto diffs = set->_difficultyBeatmaps;
+            auto chara = set->____beatmapCharacteristicName;
+            auto diffs = set->____difficultyBeatmaps;
             for (auto diff : diffs) {
-                auto detailsOpt = saveData->TryGetCharacteristicAndDifficulty(chara, diff->_difficultyRank);
+                auto customData = saveData->get_CustomSaveDataInfo();
+                if (!customData.has_value()) {
+                    continue;
+                }
+
+                auto detailsOpt = customData.value().get().TryGetCharacteristicAndDifficulty(chara, diff->____difficultyRank);
                 if(detailsOpt) {
                     auto details = detailsOpt.value();
                     if (details.get().requirements.size() > 0) return !invert;

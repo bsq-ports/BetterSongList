@@ -47,7 +47,7 @@ custom_types::Helpers::Coroutine RemoveViewControllersCoroutine(HMUI::ContainerV
     }
 
     auto eventSystem = UnityEngine::EventSystems::EventSystem::get_current();
-    if (eventSystem && eventSystem->m_CachedPtr) eventSystem->SetSelectedGameObject(nullptr);
+    if (eventSystem && eventSystem->___m_CachedPtr.m_value) eventSystem->SetSelectedGameObject(nullptr);
 
     // idk if casting an array like that is allowed but it should work like on PC?
     auto viewControllersToRemoveSet = HashSet<UnityW<HMUI::ViewController>>::New_ctor(reinterpret_cast<System::Collections::Generic::IEnumerable_1<UnityW<HMUI::ViewController>>*>(wrappedViewControllrs.convert()));
@@ -71,7 +71,7 @@ custom_types::Helpers::Coroutine RemoveViewControllersCoroutine(HMUI::ContainerV
     // this._viewControllers = this._viewControllers.Except(viewControllersToRemove).ToList<ViewController>();
     // this VV does the same thing except no need to make a new list
     for (auto vc : viewControllers) {
-        self->viewControllers->Remove(vc);
+        self->____viewControllers->Remove(vc);
     }
     
     self->set_isInTransition(false);

@@ -153,7 +153,7 @@ namespace BetterSongList::Hooks {
         if ((filter && !filter->get_isReady()) || (sorter && !sorter->get_isReady())) {
             auto instance = FilterUI::get_instance();
             auto indicator = instance->filterLoadingIndicator;
-            if (indicator && indicator->m_CachedPtr) {
+            if (indicator && indicator->___m_CachedPtr.m_value) {
                 indicator->get_gameObject()->SetActive(true);
             }
 
@@ -231,7 +231,7 @@ namespace BetterSongList::Hooks {
 
         auto instance = FilterUI::get_instance();
         auto loadingIndicator = instance->filterLoadingIndicator;
-        if (loadingIndicator && loadingIndicator->m_CachedPtr) {
+        if (loadingIndicator && loadingIndicator->___m_CachedPtr.m_value) {
             loadingIndicator->get_gameObject()->SetActive(false);
         }
 
@@ -249,7 +249,7 @@ namespace BetterSongList::Hooks {
         DEBUG("HookLevelCollectionTableSet::PostFix({}, {})", fmt::ptr(self), previewBeatmapLevels ? previewBeatmapLevels.size() : 0);
         lastOutMapList.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(previewBeatmapLevels));
         if (customLegend.empty()) return;
-        auto alphabetScrollBar = self->_alphabetScrollbar;
+        auto alphabetScrollBar = self->____alphabetScrollbar;
         auto data = ArrayW<GlobalNamespace::AlphabetScrollInfo::Data*>(il2cpp_array_size_t(customLegend.size()));
         DEBUG("Legend size: {}, {}", data->get_Length(), customLegend.size());
         for (int i = 0; const auto& [key, value] : customLegend)
@@ -258,7 +258,7 @@ namespace BetterSongList::Hooks {
         alphabetScrollBar->SetData(reinterpret_cast<System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::AlphabetScrollInfo::Data*>*>(data.convert()));
 
         DEBUG("making texts");
-        ListW<TMPro::TextMeshProUGUI*> texts{alphabetScrollBar->_texts};
+        ListW<TMPro::TextMeshProUGUI*> texts{alphabetScrollBar->____texts};
         DEBUG("setting values");
         for (int i = 0; const auto& [key, value] : customLegend) {
             DEBUG("{}: {}", i, key);
@@ -267,7 +267,7 @@ namespace BetterSongList::Hooks {
 
         DEBUG("Legend Clear");
         customLegend.clear();
-        auto tableViewT = self->_tableView->get_transform().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
+        auto tableViewT = self->____tableView->get_transform().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
         auto scrollBarT = alphabetScrollBar->get_transform().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
         tableViewT->set_offsetMin({scrollBarT->get_rect().get_size().x + 1.0f, 0.0f});
         alphabetScrollBar->get_gameObject()->SetActive(true);
