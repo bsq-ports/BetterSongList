@@ -9,3 +9,5 @@ mod.json
 *.qmod
 *.psd
 .vscode/
+log.txt
+ndkpath.txt

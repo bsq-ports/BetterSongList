@@ -11,13 +11,15 @@
 
 #include "Utils/SongDetails.hpp"
 
-extern "C" void setup(CModInfo* info) {
+#include "_config.h"
+
+BSL_EXPORT_FUNC void setup(CModInfo* info) {
     info->id = MOD_ID;
     info->version = VERSION;
     info->version_long = 0;
 }
 
-extern "C" void late_load() {
+BSL_EXPORT_FUNC void late_load() {
     BetterSongList::Hooking::InstallHooks();
     custom_types::Register::AutoRegister();
 

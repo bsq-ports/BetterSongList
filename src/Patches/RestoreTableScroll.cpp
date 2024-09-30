@@ -4,6 +4,7 @@
 
 #include "GlobalNamespace/BeatmapLevel.hpp"
 #include "System/Tuple_2.hpp"
+#include "HMUI/TableView.hpp"
 
 template <> struct fmt::formatter<std::optional<int>> : formatter<string_view> {
     // parse is inherited from formatter<string_view>.

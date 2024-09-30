@@ -8,18 +8,15 @@
     "url": "https://github.com/BSMGPink/BetterSongList",
     "additionalData": {
       "overrideSoName": "libbsl.so",
-      "headersOnly": true
+      "headersOnly": true,
+      "cmake": true
     }
   },
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^5.1.7",
-      "additionalData": {
-        "extraFiles": [
-          "src/inline-hook"
-        ]
-      }
+      "versionRange": "^5.1.9",
+      "additionalData": {}
     },
     {
       "id": "bs-cordl",
@@ -29,39 +26,42 @@
     {
       "id": "scotland2",
       "versionRange": "^0.1.4",
-      "additionalData": {}
+      "additionalData": {
+        "includeQmod": false,
+        "private": true
+      }
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.17.8",
+      "versionRange": "^0.17.10",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "bsml",
-      "versionRange": "^0.4.40",
+      "versionRange": "^0.4.43",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "paper",
-      "versionRange": "^3.6.3",
+      "versionRange": "^3.6.4",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "songcore",
-      "versionRange": "^1.1.13",
+      "versionRange": "^1.1.15",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "song-details",
-      "versionRange": "^0.3.3",
+      "versionRange": "^0.3.4",
       "additionalData": {}
     },
     {
@@ -80,7 +80,7 @@
     },
     {
       "id": "playlistcore",
-      "versionRange": "^1000.4.1",
+      "versionRange": "^1.4.2",
       "additionalData": {
         "private": true
       }

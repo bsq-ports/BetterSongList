@@ -10,7 +10,8 @@
       "url": "https://github.com/BSMGPink/BetterSongList",
       "additionalData": {
         "headersOnly": true,
-        "overrideSoName": "libbsl.so"
+        "overrideSoName": "libbsl.so",
+        "cmake": true
       }
     },
     "workspace": {
@@ -22,12 +23,8 @@
     "dependencies": [
       {
         "id": "beatsaber-hook",
-        "versionRange": "^5.1.7",
-        "additionalData": {
-          "extraFiles": [
-            "src/inline-hook"
-          ]
-        }
+        "versionRange": "^5.1.9",
+        "additionalData": {}
       },
       {
         "id": "bs-cordl",
@@ -37,44 +34,47 @@
       {
         "id": "scotland2",
         "versionRange": "^0.1.4",
-        "additionalData": {}
+        "additionalData": {
+          "includeQmod": false,
+          "private": true
+        }
       },
       {
         "id": "custom-types",
-        "versionRange": "^0.17.8",
+        "versionRange": "^0.17.10",
         "additionalData": {
           "private": true
         }
       },
       {
         "id": "bsml",
-        "versionRange": "^0.4.34",
+        "versionRange": "^0.4.43",
         "additionalData": {
           "private": true
         }
       },
       {
         "id": "paper",
-        "versionRange": "^3.6.3",
+        "versionRange": "^3.6.4",
         "additionalData": {
           "private": true
         }
       },
       {
         "id": "songcore",
-        "versionRange": "^1.1.13",
+        "versionRange": "^1.1.15",
         "additionalData": {
           "private": true
         }
       },
       {
         "id": "song-details",
-        "versionRange": "^0.3.3",
+        "versionRange": "^0.3.4",
         "additionalData": {}
       },
       {
         "id": "sombrero",
-        "versionRange": "^0.1.40",
+        "versionRange": "^0.1.42",
         "additionalData": {
           "private": true
         }
@@ -87,15 +87,8 @@
         }
       },
       {
-        "id": "bsml",
-        "versionRange": "^0.4.34",
-        "additionalData": {
-          "private": true
-        }
-      },
-      {
         "id": "playlistcore",
-        "versionRange": "^1000.4.1",
+        "versionRange": "^1.4.2",
         "additionalData": {
           "private": true
         }
@@ -111,17 +104,32 @@
     {
       "dependency": {
         "id": "bsml",
-        "versionRange": "=0.4.40",
+        "versionRange": "=0.4.43",
         "additionalData": {
-          "soLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.40/libbsml.so",
-          "debugSoLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.40/debug_libbsml.so",
+          "soLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.43/libbsml.so",
+          "debugSoLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.43/debug_libbsml.so",
           "overrideSoName": "libbsml.so",
-          "modLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.40/BSML.qmod",
-          "branchName": "version/v0_4_40",
+          "modLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.43/BSML.qmod",
+          "branchName": "version/v0_4_43",
           "cmake": true
         }
       },
-      "version": "0.4.40"
+      "version": "0.4.43"
+    },
+    {
+      "dependency": {
+        "id": "web-utils",
+        "versionRange": "=0.6.7",
+        "additionalData": {
+          "soLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/libweb-utils.so",
+          "debugSoLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/debug_libweb-utils.so",
+          "overrideSoName": "libweb-utils.so",
+          "modLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/WebUtils.qmod",
+          "branchName": "version/v0_6_7",
+          "cmake": false
+        }
+      },
+      "version": "0.6.7"
     },
     {
       "dependency": {
@@ -172,32 +180,32 @@
     {
       "dependency": {
         "id": "songcore",
-        "versionRange": "=1.1.13",
+        "versionRange": "=1.1.15",
         "additionalData": {
-          "soLink": "https://github.com/raineio/Quest-SongCore/releases/download/v1.1.13/libsongcore.so",
-          "debugSoLink": "https://github.com/raineio/Quest-SongCore/releases/download/v1.1.13/debug_libsongcore.so",
+          "soLink": "https://github.com/raineio/Quest-SongCore/releases/download/v1.1.15/libsongcore.so",
+          "debugSoLink": "https://github.com/raineio/Quest-SongCore/releases/download/v1.1.15/debug_libsongcore.so",
           "overrideSoName": "libsongcore.so",
-          "modLink": "https://github.com/raineio/Quest-SongCore/releases/download/v1.1.13/SongCore.qmod",
-          "branchName": "version/v1_1_13",
+          "modLink": "https://github.com/raineio/Quest-SongCore/releases/download/v1.1.15/SongCore.qmod",
+          "branchName": "version/v1_1_15",
           "cmake": true
         }
       },
-      "version": "1.1.13"
+      "version": "1.1.15"
     },
     {
       "dependency": {
         "id": "song-details",
-        "versionRange": "=0.3.3",
+        "versionRange": "=0.3.4",
         "additionalData": {
-          "soLink": "https://github.com/RedBrumbler/SongDetails/releases/download/v0.3.3/libsongdetails.so",
-          "debugSoLink": "https://github.com/RedBrumbler/SongDetails/releases/download/v0.3.3/debug_libsongdetails.so",
+          "soLink": "https://github.com/RedBrumbler/SongDetails/releases/download/v0.3.4/libsongdetails.so",
+          "debugSoLink": "https://github.com/RedBrumbler/SongDetails/releases/download/v0.3.4/debug_libsongdetails.so",
           "overrideSoName": "libsongdetails.so",
-          "modLink": "https://github.com/RedBrumbler/SongDetails/releases/download/v0.3.3/SongDetails.qmod",
-          "branchName": "version/v0_3_3",
+          "modLink": "https://github.com/RedBrumbler/SongDetails/releases/download/v0.3.4/SongDetails.qmod",
+          "branchName": "version/v0_3_4",
           "cmake": false
         }
       },
-      "version": "0.3.3"
+      "version": "0.3.4"
     },
     {
       "dependency": {
@@ -217,13 +225,13 @@
     {
       "dependency": {
         "id": "paper",
-        "versionRange": "=3.6.3",
+        "versionRange": "=3.6.4",
         "additionalData": {
-          "soLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.3/libpaperlog.so",
-          "debugSoLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.3/debug_libpaperlog.so",
+          "soLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.4/libpaperlog.so",
+          "debugSoLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.4/debug_libpaperlog.so",
           "overrideSoName": "libpaperlog.so",
-          "modLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.3/paperlog.qmod",
-          "branchName": "version/v3_6_3",
+          "modLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.4/paperlog.qmod",
+          "branchName": "version/v3_6_4",
           "compileOptions": {
             "systemIncludes": [
               "shared/utfcpp/source"
@@ -232,7 +240,7 @@
           "cmake": false
         }
       },
-      "version": "3.6.3"
+      "version": "3.6.4"
     },
     {
       "dependency": {
@@ -251,23 +259,26 @@
     {
       "dependency": {
         "id": "playlistcore",
-        "versionRange": "=1000.4.1",
+        "versionRange": "=1.4.2",
         "additionalData": {
-          "overrideSoName": "libplaylistcore.so"
+          "soLink": "https://github.com/Metalit/PlaylistCore/releases/download/v1.4.2/libplaylistcore.so",
+          "overrideSoName": "libplaylistcore.so",
+          "modLink": "https://github.com/Metalit/PlaylistCore/releases/download/v1.4.2/PlaylistCore.qmod",
+          "branchName": "version/v1_4_2"
         }
       },
-      "version": "1000.4.1"
+      "version": "1.4.2"
     },
     {
       "dependency": {
         "id": "custom-types",
-        "versionRange": "=0.17.8",
+        "versionRange": "=0.17.10",
         "additionalData": {
-          "soLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.8/libcustom-types.so",
-          "debugSoLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.8/debug_libcustom-types.so",
+          "soLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.10/libcustom-types.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.10/debug_libcustom-types.so",
           "overrideSoName": "libcustom-types.so",
-          "modLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.8/CustomTypes.qmod",
-          "branchName": "version/v0_17_8",
+          "modLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.10/CustomTypes.qmod",
+          "branchName": "version/v0_17_10",
           "compileOptions": {
             "cppFlags": [
               "-Wno-invalid-offsetof"
@@ -276,7 +287,7 @@
           "cmake": true
         }
       },
-      "version": "0.17.8"
+      "version": "0.17.10"
     },
     {
       "dependency": {
@@ -315,15 +326,15 @@
     {
       "dependency": {
         "id": "beatsaber-hook",
-        "versionRange": "=5.1.7",
+        "versionRange": "=5.1.9",
         "additionalData": {
-          "soLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.7/libbeatsaber-hook_5_1_7.so",
-          "debugSoLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.7/debug_libbeatsaber-hook_5_1_7.so",
-          "branchName": "version/v5_1_7",
+          "soLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.9/libbeatsaber-hook_5_1_9.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.9/debug_libbeatsaber-hook_5_1_9.so",
+          "branchName": "version/v5_1_9",
           "cmake": true
         }
       },
-      "version": "5.1.7"
+      "version": "5.1.9"
     },
     {
       "dependency": {
@@ -356,6 +367,21 @@
         }
       },
       "version": "0.1.4"
+    },
+    {
+      "dependency": {
+        "id": "beatsaverplusplus",
+        "versionRange": "=0.1.5",
+        "additionalData": {
+          "soLink": "https://github.com/RedBrumbler/BeatSaverPlusPlus/releases/download/v0.1.5/libbeatsaverplusplus.so",
+          "debugSoLink": "https://github.com/RedBrumbler/BeatSaverPlusPlus/releases/download/v0.1.5/debug_libbeatsaverplusplus.so",
+          "overrideSoName": "libbeatsaverplusplus.so",
+          "modLink": "https://github.com/RedBrumbler/BeatSaverPlusPlus/releases/download/v0.1.5/BeatSaverPlusPlus.qmod",
+          "branchName": "version/v0_1_5",
+          "cmake": false
+        }
+      },
+      "version": "0.1.5"
     }
   ]
 }
