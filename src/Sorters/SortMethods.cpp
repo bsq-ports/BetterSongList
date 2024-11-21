@@ -8,12 +8,40 @@
 
 
 namespace BetterSongList {
+    static std::string toLowercase(const std::string& str) {
+        std::string result;
+
+        for (char c : str) {
+            result += std::tolower(c);
+        }
+
+        return result;
+    }
+
+    static std::string joinArray(ArrayW<StringW>* array, std::string delimiter) {
+        if (array->size() == 0) {
+            return "";
+        }
+
+        std::string output = "";
+
+        for (auto item : *array) {
+            if (output != "") {
+                output = output + delimiter;
+            }
+
+            output = output + std::string(item);
+        }
+
+        return output;
+    }
+
     static ComparableFunctionSorterWithLegend alphabeticalSongname(
         [](auto a, auto b) -> int {
-            return static_cast<std::u16string_view>(a->songName) < (static_cast<std::u16string_view>(b->songName));
+            return toLowercase(a->songName) < toLowercase(b->songName);
         },
         [](GlobalNamespace::BeatmapLevel* song) -> std::string {
-            std::string songName{static_cast<std::string>(song->songName)};
+            std::string songName = toLowercase(song->songName);
             return songName.size() > 0 ? songName.substr(0, 1) : "";
         }
     );
@@ -27,13 +55,10 @@ namespace BetterSongList {
         }
     );
 
-    // TODO: Support more than one mapper, it's okay for now since most custom songs only have one mapper set
     static ComparableFunctionSorterWithLegend alphabeticalMapper(
         [](auto a, auto b) -> int {
-            StringW mappera = a->allMappers.size() > 0 ? a->allMappers[0] : "";
-            StringW mapperb = b->allMappers.size() > 0 ? b->allMappers[0] : "";
-            return static_cast<std::u16string_view>(mappera) < (static_cast<std::u16string_view>(mapperb));
-        }, 
+            return toLowercase(joinArray(&a->allMappers, "|")) < toLowercase(joinArray(&b->allMappers, "|"));
+        },
         [](auto song) -> std::string {
             std::string levelAuthor{static_cast<std::string>(song->allMappers.size() > 0 ? song->allMappers[0] : "")};
             return levelAuthor.size() > 0 ? levelAuthor.substr(0, 1) : "";
