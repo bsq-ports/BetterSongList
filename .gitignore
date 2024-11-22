@@ -11,3 +11,4 @@ mod.json
 .vscode/
 log.txt
 ndkpath.txt
+.cache/
