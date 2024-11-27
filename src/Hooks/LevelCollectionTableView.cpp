@@ -7,11 +7,17 @@
 #include "Patches/UI/ScrollEnhancement.hpp"
 #include "GlobalNamespace/LevelCollectionTableView.hpp"
 #include "GlobalNamespace/LevelCollectionNavigationController.hpp"
+#include "Utils/GetFullName.hpp"
+
+// Checks if the LevelCollectionTableView is the correct one.
+#define IS_CORRECT_CONTROL self->transform->name == "LevelsTableView" && self->transform->parent->name == "LevelCollecionViewController" // LevelCollecionViewController/LevelsTableView
 
 // from RestoreTableScroll
 // from UI/ScrollEnhancement
 MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_Init_0, static_cast<void (GlobalNamespace::LevelCollectionTableView::*)()>(&GlobalNamespace::LevelCollectionTableView::Init), void, GlobalNamespace::LevelCollectionTableView* self) {
-    if (self->name == "LevelsTableView") {
+    BSLLogger::Logger.info("{}", GetFullName(self));
+
+    if (IS_CORRECT_CONTROL) {
         BetterSongList::Hooks::RestoreTableScroll::LevelCollectionTableView_Init_Prefix(self);
         BetterSongList::Hooks::ScrollEnhancement::LevelCollectionTableView_Init_Prefix(self, self->_isInitialized, self->_tableView);
     }
@@ -21,7 +27,9 @@ MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_Init_0, static_cast<void (GlobalNa
 
 // from RestoreTableScroll
 MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_Init_2, static_cast<void (GlobalNamespace::LevelCollectionTableView::*)(::StringW, ::UnityEngine::Sprite*)>(&GlobalNamespace::LevelCollectionTableView::Init), void, GlobalNamespace::LevelCollectionTableView* self, StringW headerText, UnityEngine::Sprite* headerSprite) {
-    if (self->name == "LevelsTableView") {
+    BSLLogger::Logger.info("{}", GetFullName(self));
+
+    if (IS_CORRECT_CONTROL) {
         BetterSongList::Hooks::RestoreTableScroll::LevelCollectionTableView_Init_Prefix(self);
     }
 
@@ -31,7 +39,9 @@ MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_Init_2, static_cast<void (GlobalNa
 // from RestoreTableScroll
 // from HookLevelCollectionTableSet
 MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_SetData, &GlobalNamespace::LevelCollectionTableView::SetData, void, GlobalNamespace::LevelCollectionTableView* self, System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::BeatmapLevel*>* beatmapLevels, System::Collections::Generic::HashSet_1<StringW>* favoriteLevelIds, bool beatmapLevelsAreSorted, bool sortBeatmapLevels) {
-    if (self->name == "LevelsTableView") {
+    BSLLogger::Logger.info("{}", GetFullName(self));
+
+    if (IS_CORRECT_CONTROL) {
         ArrayW<GlobalNamespace::BeatmapLevel*> arr{(void*)beatmapLevels};
 
         BetterSongList::Hooks::HookLevelCollectionTableSet::LevelCollectionTableView_SetData_Prefix(self, arr, favoriteLevelIds, beatmapLevelsAreSorted);
@@ -46,7 +56,9 @@ MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_SetData, &GlobalNamespace::LevelCo
 MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_HandleDidSelectRowEvent, &GlobalNamespace::LevelCollectionTableView::HandleDidSelectRowEvent, void, GlobalNamespace::LevelCollectionTableView* self, ::HMUI::TableView* tableView, int row) {
     LevelCollectionTableView_HandleDidSelectRowEvent(self, tableView, row);
 
-    if (self->name == "LevelsTableView") {
+    BSLLogger::Logger.info("{}", GetFullName(self));
+
+    if (IS_CORRECT_CONTROL) {
         BetterSongList::Hooks::HookSelectedInTable::LevelCollectionTableView_HandleDidSelectRowEvent_Postfix(self->_selectedBeatmapLevel);
     }
 }
