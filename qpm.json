@@ -1,4 +1,5 @@
 {
+  "version": "0.4.0",
   "sharedDir": "shared",
   "dependenciesDir": "extern",
   "info": {
@@ -7,10 +8,17 @@
     "version": "0.1.0",
     "url": "https://github.com/BSMGPink/BetterSongList",
     "additionalData": {
-      "overrideSoName": "libbsl.so",
       "headersOnly": true,
+      "overrideSoName": "libbsl.so",
       "cmake": true
     }
+  },
+  "workspace": {
+    "scripts": {},
+    "ndk": "^27.2.12479018",
+    "qmodIncludeDirs": [],
+    "qmodIncludeFiles": [],
+    "qmodOutput": null
   },
   "dependencies": [
     {
@@ -20,7 +28,7 @@
     },
     {
       "id": "bs-cordl",
-      "versionRange": "^3700.*",
+      "versionRange": "3700.*",
       "additionalData": {}
     },
     {
@@ -61,7 +69,7 @@
     },
     {
       "id": "song-details",
-      "versionRange": "^0.3.4",
+      "versionRange": "^1.0.1",
       "additionalData": {}
     },
     {
@@ -90,6 +98,5 @@
       "versionRange": "^0.3.0",
       "additionalData": {}
     }
-  ],
-  "additionalData": {}
+  ]
 }
