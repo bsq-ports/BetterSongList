@@ -11,10 +11,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED 20)
 # Autocomplete
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Enable link time optimization
-# In my experience, this can be highly unstable but it nets a huge size optimization and likely performance
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-
 # define that stores the actual source directory
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -22,6 +18,19 @@ set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # compile options used
 add_link_options(-Wl,--exclude-libs,ALL)
 add_compile_options(-frtti -fPIE -fPIC -fexceptions -fvisibility=hidden)
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "RELEASE" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo" OR ${CMAKE_BUILD_TYPE} STREQUAL "MinSizeRel")
+    # Better optimizations
+    add_compile_options(-O3)
+
+    # LTO
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    add_compile_options(-flto)
+else()
+    # Debug options
+    add_compile_options(-O0 -g)
+endif()
+
 # compile definitions used
 add_compile_definitions(VERSION=\"${MOD_VERSION}\")
 add_compile_definitions(MOD_ID=\"${MOD_ID}\")
