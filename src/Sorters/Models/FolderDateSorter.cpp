@@ -17,8 +17,16 @@ namespace BetterSongList {
     std::map<std::string, int> FolderDateSorter::songTimes;
 
     bool FolderDateSorter::isLoading = false;
+    bool FolderDateSorter::eventsMapped = false;
 
-    FolderDateSorter::FolderDateSorter() : ISorterWithLegend(), ISorterPrimitive() {}
+    FolderDateSorter::FolderDateSorter() : ISorterWithLegend(), ISorterPrimitive() { }
+
+    FolderDateSorter::~FolderDateSorter() {
+        if (this->eventsMapped) {
+            SongCore::API::Loading::GetSongsLoadedEvent() -= {&FolderDateSorter::OnSongsLoaded, this};
+            SongCore::API::Loading::GetSongWillBeDeletedEvent() -= {&FolderDateSorter::OnSongWillBeDeleted, this};
+        }
+    }
 
     bool FolderDateSorter::get_isReady() const {
         return !songTimes.empty();
@@ -28,8 +36,12 @@ namespace BetterSongList {
         return Prepare(false);
     }
 
-    void FolderDateSorter::OnSongsLoaded(const std::vector<SongCore::SongLoader::CustomBeatmapLevel*>& songs) {
-        Prepare(false);
+    void FolderDateSorter::OnSongsLoaded(std::span<SongCore::SongLoader::CustomBeatmapLevel* const> customLevels) {
+        FolderDateSorter::GatherFolderInfoThread(false);
+    }
+
+    void FolderDateSorter::OnSongWillBeDeleted(SongCore::SongLoader::CustomBeatmapLevel* customLevel) {
+        songTimes.erase(customLevel->levelID);
     }
 
     void FolderDateSorter::GatherFolderInfoThread(bool fullReload) {
@@ -44,7 +56,7 @@ namespace BetterSongList {
             struct stat fileStat = {0};
             std::string filePath = std::string(level->get_customLevelPath());
             if (stat(filePath.c_str(), &fileStat) == 0) {
-                songTimes[levelID] = fileStat.st_ctim.tv_sec;
+                songTimes[levelID] = fileStat.st_mtim.tv_sec;
             }
         }
 
@@ -57,6 +69,13 @@ namespace BetterSongList {
         }
         isLoading = true;
         return std::async(std::launch::async, [fullReload, this](){
+            if (this->eventsMapped == false) {
+                SongCore::API::Loading::GetSongsLoadedEvent() += {&FolderDateSorter::OnSongsLoaded, this};
+                SongCore::API::Loading::GetSongWillBeDeletedEvent() += {&FolderDateSorter::OnSongWillBeDeleted, this};
+
+                this->eventsMapped = true;
+            }
+
             auto hasLoaded = SongCore::API::Loading::AreSongsLoaded();
             while(!hasLoaded) std::this_thread::yield();
             
