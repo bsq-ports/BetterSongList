@@ -11,6 +11,9 @@
     "description": "Improvement upon SongBrowser with similiar functionality",
     "dependencies": [],
     "modFiles": [],
+    "lateModFiles": [
+        "${binary}"
+    ],
     "libraryFiles": [],
     "fileCopies": []
 }
