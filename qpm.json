@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/QuestPackageManager/QPM.Package/refs/heads/main/qpm.schema.json",
   "version": "0.4.0",
   "sharedDir": "shared",
   "dependenciesDir": "extern",
@@ -23,61 +24,25 @@
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^5.1.9",
+      "versionRange": "^6.4.0",
       "additionalData": {}
     },
     {
       "id": "bs-cordl",
-      "versionRange": "3700.*",
+      "versionRange": "4020.*",
       "additionalData": {}
-    },
-    {
-      "id": "scotland2",
-      "versionRange": "^0.1.4",
-      "additionalData": {
-        "includeQmod": false,
-        "private": true
-      }
-    },
-    {
-      "id": "custom-types",
-      "versionRange": "^0.17.10",
-      "additionalData": {
-        "private": true
-      }
     },
     {
       "id": "bsml",
-      "versionRange": "^0.4.43",
+      "versionRange": "^0.4.49",
       "additionalData": {
         "private": true
       }
     },
     {
-      "id": "paper",
-      "versionRange": "^3.6.4",
-      "additionalData": {
-        "private": true
-      }
-    },
-    {
-      "id": "songcore",
-      "versionRange": "^1.1.15",
-      "additionalData": {
-        "private": true
-      }
-    },
-    {
-      "id": "song-details",
-      "versionRange": "^1.0.1",
+      "id": "conditional-dependencies",
+      "versionRange": "^0.3.0",
       "additionalData": {}
-    },
-    {
-      "id": "sombrero",
-      "versionRange": "^0.1.42",
-      "additionalData": {
-        "private": true
-      }
     },
     {
       "id": "cpp-semver",
@@ -87,16 +52,50 @@
       }
     },
     {
-      "id": "playlistcore",
-      "versionRange": "^1.4.2",
+      "id": "custom-types",
+      "versionRange": "^0.18.2",
       "additionalData": {
         "private": true
       }
     },
     {
-      "id": "conditional-dependencies",
-      "versionRange": "^0.3.0",
+      "id": "paper2_scotland2",
+      "versionRange": "^4.5.0",
+      "additionalData": {
+        "private": true
+      }
+    },
+    {
+      "id": "playlistcore",
+      "versionRange": "^1.4.3",
       "additionalData": {}
+    },
+    {
+      "id": "scotland2",
+      "versionRange": "^0.1.6",
+      "additionalData": {
+        "includeQmod": false,
+        "private": true
+      }
+    },
+    {
+      "id": "sombrero",
+      "versionRange": "^0.1.42",
+      "additionalData": {
+        "private": true
+      }
+    },
+    {
+      "id": "song-details",
+      "versionRange": "^1.0.2",
+      "additionalData": {}
+    },
+    {
+      "id": "songcore",
+      "versionRange": "^1.1.18",
+      "additionalData": {
+        "private": true
+      }
     }
   ]
 }

@@ -33,7 +33,7 @@
 #include "songcore/shared/SongLoader/CustomBeatmapLevel.hpp"
 #include "CustomTypes/CanvasGroupLinker.hpp"
 
-#include "paper/shared/utfcpp/source/utf8.h"
+#include "paper2_scotland2/shared/utfcpp/source/utf8.h"
 
 #include <algorithm>
 
@@ -47,7 +47,7 @@ std::array<SongDetailsCache::MapDifficulty, 5> diffToString {
 
 // Map for difficulties
 static const std::unordered_map<int, SongDetailsCache::MapDifficulty> diffMap = {
-    
+
 };
 
 SongDetailsCache::MapDifficulty BeatmapDifficultyToString(int value) {
@@ -177,7 +177,7 @@ namespace BetterSongList::Hooks {
                     INFO("Got hash: {}", hash);
                     const SongDetailsCache::Song* song = nullptr;
                     const SongDetailsCache::SongDifficulty* diff = nullptr;
-                    
+
                     // Get song and difficulty
                     {
                         if (!hash.empty()) {
@@ -193,7 +193,7 @@ namespace BetterSongList::Hooks {
                             }
                         }
                     }
-                    
+
                     if (hash.empty() || // no hash
                         !song || // song not found
                         !diff // diff not found

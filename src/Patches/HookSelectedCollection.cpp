@@ -29,7 +29,7 @@ namespace BetterSongList::Hooks {
             INFO("It is now '{}'", config.get_lastPack());
         }
 
-        INFO("AnnotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(): {0}", beatmapLevelCollection ? beatmapLevelCollection->packName : "NULL");
+        INFO("AnnotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(): {0}", beatmapLevelCollection ? static_cast<std::string>(beatmapLevelCollection->packName) : "NULL");
         auto pack = SongCore::API::Loading::GetCustomLevelPack();
 
         auto instance = FilterUI::get_instance();

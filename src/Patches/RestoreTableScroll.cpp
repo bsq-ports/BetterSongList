@@ -22,7 +22,7 @@ template <> struct fmt::formatter<std::optional<int>> : formatter<string_view> {
 namespace BetterSongList::Hooks {
     std::optional<int> RestoreTableScroll::scrollToIndex = std::nullopt;
     bool RestoreTableScroll::doResetScrollOnNext = false;
-    
+
     void RestoreTableScroll::ResetScroll() {
         scrollToIndex = 0;
         doResetScrollOnNext = true;
@@ -35,18 +35,18 @@ namespace BetterSongList::Hooks {
             scrollToIndex = self->_tableView->GetVisibleCellsIdRange()->get_Item1();
 
         doResetScrollOnNext = false;
-		INFO("LevelCollectionTableView.Init():Prefix - scrollToIndex: {}", scrollToIndex);
+		INFO("LevelCollectionTableView.Init():Prefix - scrollToIndex: {}", scrollToIndex.value_or(-1));
     }
 
     void RestoreTableScroll::LevelCollectionTableView_SetData_PostFix(GlobalNamespace::LevelCollectionTableView* self) {
-		INFO("DoTheFunnySelect -> LevelCollectionTableView.SetData():Postfix scrollToIndex: {}", RestoreTableScroll::scrollToIndex);
+		INFO("DoTheFunnySelect -> LevelCollectionTableView.SetData():Postfix scrollToIndex: {}", RestoreTableScroll::scrollToIndex.value_or(-1));
         auto tableView = self->_tableView;
         auto previewBeatmapLevels = self->_beatmapLevels;
         auto showLevelPackHeader = self->_showLevelPackHeader;
 
         if (!RestoreTableScroll::scrollToIndex.has_value() || RestoreTableScroll::scrollToIndex.value() < 0) return;
 
-		INFO("-> Scrolling to {}", RestoreTableScroll::scrollToIndex);
+		INFO("-> Scrolling to {}", RestoreTableScroll::scrollToIndex.value_or(-1));
 
         tableView->ScrollToCellWithIdx(
             RestoreTableScroll::scrollToIndex.value(),

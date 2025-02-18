@@ -8,7 +8,7 @@
 #include "UnityEngine/Transform.hpp"
 #include "config.hpp"
 
-DECLARE_CLASS_CODEGEN(BetterSongList, Settings, Il2CppObject,
+DECLARE_CLASS_CODEGEN(BetterSongList, Settings, Il2CppObject) {
     DECLARE_INSTANCE_METHOD(void, SettingsClosed);
     DECLARE_INSTANCE_METHOD(void, PostParse);
     DECLARE_INSTANCE_METHOD(void, OpenSponsorModal);
@@ -31,11 +31,11 @@ DECLARE_CLASS_CODEGEN(BetterSongList, Settings, Il2CppObject,
     BSML_PROPERTY_DEFINITION(float, accuracyMultiplier);
     BSML_OPTIONS_LIST_OBJECT(preferredLeaderboardChoices, "ScoreSaber", "BeatLeader");
     BSML_PROPERTY_DEFINITION(StringW, preferredLeaderboard);
-    
+
     DECLARE_DEFAULT_CTOR();
     public:
         static std::string get_version();
         static Settings* get_instance();
     private:
         static SafePtr<Settings> instance;
-)
+};
