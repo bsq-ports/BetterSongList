@@ -16,7 +16,7 @@
 
 #include <queue>
 
-DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject,
+DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject) {
     DECLARE_INSTANCE_FIELD(UnityEngine::RectTransform*, root);
     DECLARE_INSTANCE_FIELD(BSML::DropdownListSetting*, sortDropDown);
     DECLARE_INSTANCE_FIELD(BSML::DropdownListSetting*, filterDropDown);
@@ -40,7 +40,7 @@ DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject,
     DECLARE_INSTANCE_METHOD(void, SettingsOpened);
     DECLARE_INSTANCE_METHOD(void, PostParse);
     DECLARE_INSTANCE_METHOD(void, CloseWarningModal);
-    
+
     DECLARE_CTOR(ctor);
     public:
 		static void UpdateVisibleTransformers();
@@ -58,8 +58,8 @@ DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject,
         static SafePtr<FilterUI> instance;
         static std::map<std::string, BetterSongList::ISorter*> sortOptions;
         static std::map<std::string, BetterSongList::IFilter*> filterOptions;
-        
+
         std::queue<std::string> warnings;
 
         custom_types::Helpers::Coroutine _ShowError();
-)
+};

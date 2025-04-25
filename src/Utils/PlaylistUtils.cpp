@@ -62,7 +62,7 @@ namespace BetterSongList::PlaylistUtils {
                 INFO(":3 9");
 
                 for (auto p : packs) {
-                    INFO(":3 10 {}", p->packID);
+                    INFO(":3 10 {}", static_cast<std::string>(p->packID));
                     builtinPacks->Add(p->packID, p);
                 }
                 INFO(":3 11");
@@ -87,6 +87,6 @@ namespace BetterSongList::PlaylistUtils {
     }
 
     ArrayW<GlobalNamespace::BeatmapLevel*> GetLevelsForLevelCollection(GlobalNamespace::BeatmapLevelPack* levelCollection) {
-        return levelCollection ? levelCollection->beatmapLevels : ArrayW<GlobalNamespace::BeatmapLevel*>(il2cpp_array_size_t(0));
+        return levelCollection ? levelCollection->_beatmapLevels : ArrayW<GlobalNamespace::BeatmapLevel*>(il2cpp_array_size_t(0));
     }
 }

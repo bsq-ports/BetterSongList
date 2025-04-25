@@ -5,14 +5,15 @@
 #include "BeatmapDataLoaderVersion3/BeatmapDataLoader.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveDataItem.hpp"
+#include "BeatmapSaveDataVersion3/BurstSliderData.hpp"
 #include "BeatmapSaveDataVersion3/ObstacleData.hpp"
 #include "GlobalNamespace/BeatmapDataBasicInfo.hpp"
 #include "UnityEngine/JsonUtility.hpp"
 
 // from UI/SongDeleteButton
 // from UI/ExtraLevelParams
-MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion3_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson, 
-                    &BeatmapDataLoaderVersion3::BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveDataJson, 
+MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion3_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson,
+                    &BeatmapDataLoaderVersion3::BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveDataJson,
                     GlobalNamespace::BeatmapDataBasicInfo*, StringW beatmapJson)
 {
     if (!beatmapJson)
@@ -25,6 +26,16 @@ MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion3_BeatmapDataLoader_GetBeatmapDataB
         return nullptr;
     }
     int count = beatmapSaveData->___colorNotes->get_Count();
+
+    int burstSliderCount = beatmapSaveData->___burstSliders->get_Count();
+
+    int num = count;
+    for (int i = 0; i < burstSliderCount; i++)
+    {
+        auto burstSlider = beatmapSaveData->___burstSliders->get_Item(i);
+        num += burstSlider->cuttableSlicesCount;
+    }
+
     int count2 = beatmapSaveData->___obstacles->get_Count();
     int count3 = beatmapSaveData->___bombNotes->get_Count();
 
@@ -35,7 +46,7 @@ MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion3_BeatmapDataLoader_GetBeatmapDataB
         obstacles.push_back(BetterSongList::Hooks::SimpleObstacle(obstacle->x, obstacle->y, obstacle->width, obstacle->height, obstacle->duration, obstacle->beat));
     }
     auto mark = BetterSongList::Hooks::HookBeatmapDataLoader::GetMarkStatus(obstacles);
-    auto beatmapDataBasicInfo = GlobalNamespace::BeatmapDataBasicInfo::New_ctor(4, count, count2 * (mark ? -1 : 1), count3);
+    auto beatmapDataBasicInfo = GlobalNamespace::BeatmapDataBasicInfo::New_ctor(4, count, num, count2 * (mark ? -1 : 1), count3);
 
     return beatmapDataBasicInfo;
 }

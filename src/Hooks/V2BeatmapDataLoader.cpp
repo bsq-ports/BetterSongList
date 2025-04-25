@@ -13,8 +13,8 @@
 
 // from UI/SongDeleteButton
 // from UI/ExtraLevelParams
-MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion2_6_0AndEarlier_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson, 
-                    &BeatmapDataLoaderVersion2_6_0AndEarlier::BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveDataJson, 
+MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion2_6_0AndEarlier_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson,
+                    &BeatmapDataLoaderVersion2_6_0AndEarlier::BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveDataJson,
                     GlobalNamespace::BeatmapDataBasicInfo*, StringW beatmapJson)
 {
     if (!beatmapJson)
@@ -53,7 +53,7 @@ MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion2_6_0AndEarlier_BeatmapDataLoader_G
     }
 
     auto mark = BetterSongList::Hooks::HookBeatmapDataLoader::GetMarkStatus(obstacles);
-    auto beatmapDataBasicInfo = GlobalNamespace::BeatmapDataBasicInfo::New_ctor(4, count, count2 * (mark ? -1 : 1), count3);
+    auto beatmapDataBasicInfo = GlobalNamespace::BeatmapDataBasicInfo::New_ctor(4, count, count, count2 * (mark ? -1 : 1), count3);
 
     return beatmapDataBasicInfo;
 }

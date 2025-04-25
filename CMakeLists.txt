@@ -39,12 +39,17 @@ add_compile_definitions(MOD_ID=\"${MOD_ID}\")
 RECURSE_FILES(cpp_file_list ${SOURCE_DIR}/*.cpp)
 RECURSE_FILES(c_file_list ${SOURCE_DIR}/*.c)
 
+RECURSE_FILES(src_inline_hook_beatsaber_hook_local_extra_c ${EXTERN_DIR}/includes/beatsaber-hook/shared/inline-hook/*.c)
+RECURSE_FILES(src_inline_hook_beatsaber_hook_local_extra_cpp ${EXTERN_DIR}/includes/beatsaber-hook/shared/inline-hook/*.cpp)
+
 # add all src files to compile
 add_library(
-    ${COMPILE_ID} 
+    ${COMPILE_ID}
     SHARED
     ${cpp_file_list}
     ${c_file_list}
+    ${src_inline_hook_beatsaber_hook_local_extra_c}
+    ${src_inline_hook_beatsaber_hook_local_extra_cpp}
 )
 
 # add src dir as include dir
@@ -53,7 +58,7 @@ target_include_directories(${COMPILE_ID} PRIVATE ${SOURCE_DIR})
 target_include_directories(${COMPILE_ID} PRIVATE ${INCLUDE_DIR})
 # add shared dir as include dir
 target_include_directories(${COMPILE_ID} PUBLIC ${SHARED_DIR})
-# codegen includes 
+# codegen includes
 target_include_directories(${COMPILE_ID} PRIVATE ${EXTERN_DIR}/includes/${CODEGEN_ID}/include)
 target_include_directories(${COMPILE_ID} PRIVATE ${EXTERN_DIR}/includes/songloader/include)
 target_include_directories(${COMPILE_ID} PRIVATE ${EXTERN_DIR}/includes/songloader/shared)
@@ -66,7 +71,7 @@ add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
             COMMAND ${CMAKE_STRIP} -g -S -d --strip-all
             "lib${COMPILE_ID}.so" -o "stripped_lib${COMPILE_ID}.so"
             COMMENT "Strip debug symbols done on final binary.")
-        
+
 add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory debug
         COMMENT "Make directory for debug symbols"

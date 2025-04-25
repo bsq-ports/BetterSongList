@@ -8,12 +8,12 @@ namespace BetterSongList::Hooks {
         if (!config.get_modBasegameSearch()) return false;
 
         auto intermediate = std::vector<std::pair<int, GlobalNamespace::BeatmapLevel*>>{};
-        
+
         for(auto i = 0; i < levels->get_Count(); i++) {
             auto level = levels->get_Item(i);
             auto txtToClean = fmt::format("{} {} {} {}", level->___songName, level->___songSubName, level->___songAuthorName, fmt::join(level->___allMappers, " "));
             auto cleanedText = GlobalNamespace::LevelFilter::CleanText(txtToClean);
-            auto score = GlobalNamespace::LevelFilter::_FilterLevelByText_g__CalculateMatchScore_14_1(cleanedText, searchTexts);
+            auto score = GlobalNamespace::LevelFilter::_FilterLevelByText_g__CalculateMatchScore_15_1(cleanedText, searchTexts);
             if(score > 0) {
                 intermediate.push_back({score, level});
             }
@@ -29,7 +29,7 @@ namespace BetterSongList::Hooks {
         for(auto& [score, level] : intermediate) {
             resultLevels.push_back(level);
         }
-        
+
         result = resultLevels;
 
         return true;

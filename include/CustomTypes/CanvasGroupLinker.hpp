@@ -4,7 +4,7 @@
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "UnityEngine/CanvasGroup.hpp"
 
-DECLARE_CLASS_CODEGEN(BetterSongList, CanvasGroupLinker, UnityEngine::MonoBehaviour,
+DECLARE_CLASS_CODEGEN(BetterSongList, CanvasGroupLinker, UnityEngine::MonoBehaviour) {
 
     DECLARE_INSTANCE_METHOD(void, Update);
 
@@ -14,4 +14,4 @@ DECLARE_CLASS_CODEGEN(BetterSongList, CanvasGroupLinker, UnityEngine::MonoBehavi
     UnityEngine::CanvasGroup* baseCanvasGroup;
     UnityEngine::CanvasGroup* targetCanvasGroup;
     std::function<void()> OnCanvasGroupChanged;
-)
+};

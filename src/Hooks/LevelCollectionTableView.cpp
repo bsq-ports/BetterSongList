@@ -53,12 +53,12 @@ MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_SetData, &GlobalNamespace::LevelCo
     }
 }
 // from HookSelectedInTable
-MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_HandleDidSelectRowEvent, &GlobalNamespace::LevelCollectionTableView::HandleDidSelectRowEvent, void, GlobalNamespace::LevelCollectionTableView* self, ::HMUI::TableView* tableView, int row) {
-    LevelCollectionTableView_HandleDidSelectRowEvent(self, tableView, row);
+MAKE_AUTO_HOOK_MATCH(LevelCollectionTableView_HandleDidSelectCellWithIndex, &GlobalNamespace::LevelCollectionTableView::HandleDidSelectCellWithIndex, void, GlobalNamespace::LevelCollectionTableView* self, ::HMUI::TableView* tableView, int index) {
+    LevelCollectionTableView_HandleDidSelectCellWithIndex(self, tableView, index);
 
     BSLLogger::Logger.info("{}", GetFullName(self));
 
     if (IS_CORRECT_CONTROL) {
-        BetterSongList::Hooks::HookSelectedInTable::LevelCollectionTableView_HandleDidSelectRowEvent_Postfix(self->_selectedBeatmapLevel);
+        BetterSongList::Hooks::HookSelectedInTable::LevelCollectionTableView_HandleDidSelectCellWithIndex_Postfix(self->_selectedBeatmapLevel);
     }
 }
