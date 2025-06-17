@@ -1,18 +1,18 @@
 {
-    "_QPVersion": "0.1.2",
-    "name": "${mod_name}",
-    "id": "${mod_id}",
-    "author": "Kinsi55",
-    "porter": "RedBrumbler, Pink",
-    "version": "${version}",
-    "packageId": "com.beatgames.beatsaber",
-    "packageVersion": "1.40.4_5283",
-    "coverImage": "cover.jpg",
-    "description": "Improvement upon SongBrowser with similiar functionality",
-    "dependencies": [],
-    "modFiles": [
-        "${binary}"
-    ],
-    "libraryFiles": [],
-    "fileCopies": []
+  "_QPVersion": "0.1.2",
+  "name": "${mod_name}",
+  "id": "${mod_id}",
+  "author": "Kinsi55",
+  "porter": "RedBrumbler, Pink",
+  "version": "${version}",
+  "packageId": "com.beatgames.beatsaber",
+  "packageVersion": "1.40.6_6407",
+  "coverImage": "cover.jpg",
+  "description": "Improvement upon SongBrowser with similiar functionality",
+  "dependencies": [],
+  "modFiles": [
+    "${binary}"
+  ],
+  "libraryFiles": [],
+  "fileCopies": []
 }
