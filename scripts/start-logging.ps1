@@ -42,7 +42,7 @@ $command = "adb logcat "
 
 if ($all -eq $false) {
     $loops = 0
-    while ([string]::IsNullOrEmpty($bspid) -and $loops -lt 3) {
+    while ([string]::IsNullOrEmpty($bspid) -and $loops -lt 6) {
         Start-Sleep -Milliseconds 100
         $bspid = adb shell pidof com.beatgames.beatsaber
         $loops += 1
@@ -61,6 +61,7 @@ if ($all -eq $false) {
     if ($self -eq $true) {
         $modID = (Get-Content "./mod.json" -Raw | ConvertFrom-Json).id
         $pattern += "$modID|"
+        $pattern += "BetterSongList|"
     }
     if (![string]::IsNullOrEmpty($custom)) {
         $pattern += "$custom|"

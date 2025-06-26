@@ -16,13 +16,12 @@
 #include "Patches/HookLevelCollectionTableSet.hpp"
 #include "Patches/RestoreTableScroll.hpp"
 
-#include "sombrero/shared/RandomUtils.hpp"
-#include "sombrero/shared/MiscUtils.hpp"
 
 #include "GlobalNamespace/LevelCollectionTableView.hpp"
 #include "bsml/shared/BSML/SharedCoroutineStarter.hpp"
 #include "UnityEngine/WaitForSeconds.hpp"
 #include "HMUI/SimpleTextDropdown.hpp"
+#include "Utils/Random.hpp"
 
 #include "cpp-semver/shared/cpp-semver.hpp"
 #include <algorithm>
@@ -81,7 +80,8 @@ namespace BetterSongList {
         if (!ml || ml.size() < 2) return;
 
         // random between 0 - 1, multiply by size - 1 -> random between 0 and size (exclusive max)
-        int randomIdx = Sombrero::RandomFast::randomNumber() * (float)(ml.size() - 1);
+        int randomIdx = Random::random(0, ml.size() - 1);
+
         x->SelectLevel(ml[randomIdx]);
     }
 
