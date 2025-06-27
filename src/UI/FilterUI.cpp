@@ -279,7 +279,7 @@ namespace BetterSongList {
             config.set_sortAsc(ascending);
             RestoreTableScroll::ResetScroll();
             if (refresh)
-                HookLevelCollectionTableSet::Refresh();
+                HookLevelCollectionTableSet::Refresh(true);
         }
 
 		auto sortDirection = get_instance()->sortDirection;

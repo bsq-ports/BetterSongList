@@ -31,8 +31,9 @@ namespace BetterSongList::Hooks {
     }
 
     void RestoreTableScroll::LevelCollectionTableView_Init_Prefix(GlobalNamespace::LevelCollectionTableView* self) {
-        if (self->_isInitialized && self->_tableView != nullptr && self->_beatmapLevels != nullptr && !doResetScrollOnNext)
+        if (self->_isInitialized && self->_tableView != nullptr && self->_beatmapLevels != nullptr && !doResetScrollOnNext) {
             scrollToIndex = self->_tableView->GetVisibleCellsIdRange()->get_Item1();
+        }    
 
         doResetScrollOnNext = false;
 		INFO("LevelCollectionTableView.Init():Prefix - scrollToIndex: {}", scrollToIndex.value_or(-1));

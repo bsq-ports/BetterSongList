@@ -33,5 +33,6 @@ namespace BetterSongList::Hooks {
             static SafePtr<Array<GlobalNamespace::BeatmapLevel*>> asyncPreProcessed;
             static ISorterWithLegend::Legend customLegend;
             static bool prepareThreadCurrentlyRunning;
+            static bool tryReselectLastSelectedLevel;
     };
 }

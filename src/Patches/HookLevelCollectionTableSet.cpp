@@ -21,9 +21,13 @@
 
 #include "sombrero/shared/linq_functional.hpp"
 #include "bsml/shared/BSML/MainThreadScheduler.hpp"
+#include "bsml/shared/BSML/SharedCoroutineStarter.hpp"
 
 #include "UI/FilterUI.hpp"
+#include <algorithm>
+#include <cstddef>
 #include <cxxabi.h>
+#include <optional>
 #include <sstream>
 #include <future>
 
@@ -37,6 +41,7 @@ namespace BetterSongList::Hooks {
     SafePtr<Array<GlobalNamespace::BeatmapLevel*>> HookLevelCollectionTableSet::asyncPreProcessed;
     ISorterWithLegend::Legend HookLevelCollectionTableSet::customLegend;
     bool HookLevelCollectionTableSet::prepareThreadCurrentlyRunning = false;
+    bool HookLevelCollectionTableSet::tryReselectLastSelectedLevel = false;
 
     ArrayW<GlobalNamespace::BeatmapLevel*> HookLevelCollectionTableSet::get_lastInMapList() {
         if (!lastInMapList) {
@@ -239,6 +244,7 @@ namespace BetterSongList::Hooks {
         // This is a callback to call the sort again with the same parameters
         auto isSorted = beatmapLevelsAreSorted;
         recallLast = [self, favoriteLevelIds, isSorted](ArrayW<GlobalNamespace::BeatmapLevel *> overrideData){
+            tryReselectLastSelectedLevel = true;
             auto data = overrideData ? static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(overrideData) : get_lastInMapList();
             INFO("recallLast, Data: {}", data.convert());
             if (data) {
@@ -273,9 +279,53 @@ namespace BetterSongList::Hooks {
         FilterWrapper(previewBeatmapLevels);
     }
 
+    static custom_types::Helpers::Coroutine TryReselectLastSelectedSong(GlobalNamespace::LevelCollectionTableView* __instance) {
+        // Skip a frame
+        co_yield nullptr;
+        
+        auto lastOutMapList = HookLevelCollectionTableSet::get_lastOutMapList();
+        int lastOutSize = lastOutMapList ? lastOutMapList->get_Length() : 0;
+        if(
+            __instance == nullptr || 
+            __instance->m_CachedPtr.m_value == nullptr || 
+            lastOutSize == 0
+        ) {
+            co_return;
+        }
+        auto level = lastOutMapList->FirstOrDefault([](GlobalNamespace::BeatmapLevel* level) {
+            return level->___levelID == config.get_lastSong();
+        });
+        if (!level) {
+            WARNING("LevelCollectionTableView.SetData():Postfix => TryReselectLastSelectedSong: No last selected song found, skipping reselect");
+            co_return;
+        }
+        int levelIndex = -1;
+        if (level) {
+            std::optional<int> resultindex = lastOutMapList.index_of(level);
+            if (resultindex.has_value()) {
+                levelIndex = resultindex.value();
+            }
+        }
+        if (levelIndex == -1) {
+            WARNING("LevelCollectionTableView.SetData():Postfix => TryReselectLastSelectedSong: No last selected song found, skipping reselect");
+            co_return;
+        }
+
+        int idx = std::max(0, levelIndex + (__instance->_showLevelPackHeader ? 1 : 0));
+        DEBUG("LevelCollectionTableView.SetData():Postfix => TryReselectLastSelectedSong: Scrolling to song with idx {}",  idx);
+        __instance->_selectedRow = idx;
+        __instance->_tableView->SelectCellWithIdx(idx, false);
+        __instance->_tableView->ScrollToCellWithIdx(idx, HMUI::TableView::ScrollPositionType::Center, false);
+    }
+
     void HookLevelCollectionTableSet::LevelCollectionTableView_SetData_PostFix(GlobalNamespace::LevelCollectionTableView* self, ArrayW<GlobalNamespace::BeatmapLevel*> previewBeatmapLevels) {
         DEBUG("HookLevelCollectionTableSet::PostFix({}, {})", fmt::ptr(self), previewBeatmapLevels ? previewBeatmapLevels.size() : 0);
         lastOutMapList.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(previewBeatmapLevels));
+        
+        if(tryReselectLastSelectedLevel) {
+            BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(TryReselectLastSelectedSong(self)));
+            tryReselectLastSelectedLevel = false;
+        }
         
         // Basegame already handles cleaning up the legend etc
         if (customLegend.empty()) {
