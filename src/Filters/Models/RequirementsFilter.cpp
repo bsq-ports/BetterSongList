@@ -58,8 +58,6 @@ namespace BetterSongList {
                 }
             }
         }
-        
-        DEBUG("Custom Data contained 0 requirements!");
         return invert;
     }
 }

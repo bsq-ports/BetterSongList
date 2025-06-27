@@ -29,6 +29,10 @@ namespace BetterSongList {
         return x->rankedStatus == SongDetailsCache::RankedStatus::Qualified;
     });
 
+    static BasicSongDetailsFilter v3([](const SongDetailsCache::Song* x) {
+        return hasFlags(x->uploadFlags, SongDetailsCache::UploadFlags::HasV3Environment);
+    });
+
     static BasicSongDetailsFilter onBeatsaver([](const SongDetailsCache::Song* x) { return true; });
 
     static PlayedFilter unplayed(true);
@@ -70,6 +74,7 @@ namespace BetterSongList {
 		{"Requirements", &requirements},
 		{"No Requirements", &noRequirements},
 		{"Unranked", &unranked},
+        {"V3 Environment", &v3},
 		{"All", nullptr}
     };
 }

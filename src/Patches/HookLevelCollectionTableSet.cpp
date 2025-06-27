@@ -79,7 +79,7 @@ namespace BetterSongList::Hooks {
                 // TODO: This is kind of a hack fix this to make sure we keep lastInMapList unmodified, it is modified in FilterWrapper
                 using namespace Sombrero::Linq::Functional;
                 auto inList = get_lastInMapList() | ToArray();
-                
+
                 FilterWrapper(inList);
                 asyncPreProcessed.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(inList));
                 Refresh(false, false);
@@ -300,15 +300,11 @@ namespace BetterSongList::Hooks {
         alphabetScrollBar->SetData(reinterpret_cast<System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::AlphabetScrollInfo::Data*>*>(data.convert()));
 
         // Now that all labels are there we can insert the text we want there...
-        DEBUG("making texts");
         ListW<TMPro::TextMeshProUGUI*> texts{alphabetScrollBar->____texts};
-        DEBUG("setting values");
         for (int i = 0; const auto& [key, value] : customLegend) {
-            DEBUG("{}: {}", i, key);
             texts[i++]->set_text(key);
         }
 
-        DEBUG("Legend Clear");
         customLegend.clear();
 
         // Move the table a bit to the right to accomodate for alphabet scollbar (Basegame behaviour)

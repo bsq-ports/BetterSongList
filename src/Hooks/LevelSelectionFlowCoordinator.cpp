@@ -8,6 +8,11 @@
 
 // from RestoreLevelSelection
 MAKE_AUTO_HOOK_MATCH(LevelSelectionFlowCoordinator_DidActivate, &GlobalNamespace::LevelSelectionFlowCoordinator::DidActivate, void, GlobalNamespace::LevelSelectionFlowCoordinator* self, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
+    if (!addedToHierarchy) {
+        // Don't do anything if not added to hierarchy
+        return;
+    }
+    
     BetterSongList::Hooks::RestoreLevelSelection::LevelSelectionFlowCoordinator_DidActivate_Prefix(self, self->_startState, firstActivation);
     LevelSelectionFlowCoordinator_DidActivate(self, firstActivation, addedToHierarchy, screenSystemEnabling);
 }

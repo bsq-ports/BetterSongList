@@ -20,13 +20,16 @@ add_link_options(-Wl,--exclude-libs,ALL)
 add_compile_options(-frtti -fPIE -fPIC -fexceptions -fvisibility=hidden)
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "RELEASE" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo" OR ${CMAKE_BUILD_TYPE} STREQUAL "MinSizeRel")
+    message(STATUS "Building in release mode")
     # Better optimizations
     add_compile_options(-O3)
 
     # LTO
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
     add_compile_options(-flto)
+    
 else()
+    message(STATUS "Building in debug mode")
     # Debug options
     add_compile_options(-O0 -g)
 endif()

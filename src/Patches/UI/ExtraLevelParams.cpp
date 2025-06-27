@@ -252,15 +252,13 @@ namespace BetterSongList::Hooks {
     }
 
     void ExtraLevelParams::ModifyValue(TMPro::TextMeshProUGUI* text, std::string_view hoverHint, std::string_view icon) {
-        DEBUG("Get go");
         auto go = text->get_gameObject();
         go->SetActive(true);
         BSML::Utilities::SetImage(text->get_transform()->get_parent()->Find("Icon")->get_gameObject()->GetComponent<HMUI::ImageView*>(), icon);
-        DEBUG("get hhint");
+
         auto localizedhhint = go->GetComponentInParent<GlobalNamespace::LocalizedHoverHint*>();
         if (localizedhhint) UnityEngine::Object::DestroyImmediate(localizedhhint);
 
-        DEBUG("get hhint");
         auto hhint = go->GetComponentInParent<HMUI::HoverHint*>();
 
         if (!hhint) return;

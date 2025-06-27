@@ -22,6 +22,7 @@ namespace BetterSongList::Hooks {
 
     // same as CollectionSet
     void HookSelectedCollection::AnnotatedBeatmapLevelCollectionsViewController_HandleDidSelectAnnotatedBeatmapLevelCollection_Prefix(GlobalNamespace::BeatmapLevelPack* beatmapLevelCollection) {
+        // Save the collection we're on for reselection purposes
         if (beatmapLevelCollection) {
             INFO("Setting last selected pack");
             auto name = beatmapLevelCollection->packID;
@@ -32,6 +33,7 @@ namespace BetterSongList::Hooks {
         INFO("AnnotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(): {0}", beatmapLevelCollection ? static_cast<std::string>(beatmapLevelCollection->packName) : "NULL");
         auto pack = SongCore::API::Loading::GetCustomLevelPack();
 
+        // If its a playlist we want to start off with no sorting and filtering - Requested by Pixel
         auto instance = FilterUI::get_instance();
         if (beatmapLevelCollection && config.get_clearFiltersOnPlaylistSelect() && beatmapLevelCollection != pack) {
             instance->SetSort("", false, false);
