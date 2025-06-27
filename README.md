@@ -6,7 +6,7 @@ Port of pc version of [Better Song List](https://github.com/kinsi55/BeatSaber_Be
 
 ## Install
 
-#### You can always find the latest download on [MBF](https://mbf.bsquest.xyz/) or [The Releases](https://github.com/kinsi55/BeatSaber_BetterSongList/releases), simply drag the .qmod onto MBF and it will be installed
+#### You can always find the latest download on [MBF](https://mbf.bsquest.xyz/) or [The Releases](https://github.com/bsq-ports/BetterSongList/releases), simply drag the .qmod onto MBF and it will be installed
 ## Features
 
 - Adds various sorting and filtering methods as well as a "Random Song" button
