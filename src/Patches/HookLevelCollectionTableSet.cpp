@@ -52,6 +52,12 @@ namespace BetterSongList::Hooks {
         return lastOutMapList.ptr();
     }
 
+    /**
+     * @brief Refresh the SongList with the last used BeatMaps array
+     * 
+     * @param processAsync 
+     * @param clearAsyncResult 
+     */
     void HookLevelCollectionTableSet::Refresh(bool processAsync, bool clearAsyncResult) {
         if (!get_lastInMapList()) {
             return;
@@ -59,13 +65,21 @@ namespace BetterSongList::Hooks {
 
         DEBUG("Refresh({}, {})", processAsync, clearAsyncResult);
 
+        /*
+        * This probably has problems in regards to race conditions / thread safety... We will see...
+        * Pre-processes the desired songlist state in a second thread - This will then get stored in
+        * a vaiable and used as the result on the next SetData() in the Prefix hook below
+        */
         if (clearAsyncResult) {
             asyncPreProcessed.emplace(nullptr);
         }
 
         if (processAsync) {
             PrepareStuffIfNecessary([](){
-                auto inList = get_lastInMapList();
+                // TODO: This is kind of a hack fix this to make sure we keep lastInMapList unmodified, it is modified in FilterWrapper
+                using namespace Sombrero::Linq::Functional;
+                auto inList = get_lastInMapList() | ToArray();
+                
                 FilterWrapper(inList);
                 asyncPreProcessed.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(inList));
                 Refresh(false, false);
@@ -73,6 +87,10 @@ namespace BetterSongList::Hooks {
             return;
         }
 
+        /*
+        * Forcing a refresh of the table by skipping the optimization check in the SetData():Prefix
+        * because Refresh() is only called in situations where the result will probably change
+        */
         auto ml = get_lastInMapList();
         lastInMapList.emplace(nullptr);
         if (recallLast) recallLast(ml);
@@ -196,12 +214,15 @@ namespace BetterSongList::Hooks {
 
     void HookLevelCollectionTableSet::LevelCollectionTableView_SetData_Prefix(GlobalNamespace::LevelCollectionTableView* self, ArrayW<GlobalNamespace::BeatmapLevel*>& previewBeatmapLevels, HashSet<StringW>* favoriteLevelIds, bool& beatmapLevelsAreSorted) {
         DEBUG("LevelCollectionTableView.SetData() : Prefix");
+
+        // If SetData is called with the literal same maplist as before we might as well ignore it
         if (get_lastInMapList() && previewBeatmapLevels.convert() == get_lastInMapList().convert() && get_lastOutMapList()) {
             DEBUG("LevelCollectionTableView.SetData() : Prefix -> levels = lastout because {} == {}", previewBeatmapLevels.convert(), get_lastInMapList().convert());
             previewBeatmapLevels = get_lastOutMapList();
             return;
         }
 
+        // Playlistlib has its own custom wrapping class for Playlists so it can properly track duplicates, so we need to use its collection
         if (HookSelectedCollection::get_lastSelectedCollection() && PlaylistUtils::get_hasPlaylistLib()) {
             auto playlistArr = PlaylistUtils::GetLevelsForLevelCollection(HookSelectedCollection::get_lastSelectedCollection());
             if (playlistArr) {
@@ -209,7 +230,13 @@ namespace BetterSongList::Hooks {
             }
         }
 
-        lastInMapList.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(previewBeatmapLevels));
+        // TODO: This is kind of a hack fix this to make sure we keep lastInMapList unmodified, it is modified in FilterWrapper
+        {
+            using namespace Sombrero::Linq::Functional;
+            lastInMapList.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(previewBeatmapLevels | ToArray()));
+        }
+        
+        // This is a callback to call the sort again with the same parameters
         auto isSorted = beatmapLevelsAreSorted;
         recallLast = [self, favoriteLevelIds, isSorted](ArrayW<GlobalNamespace::BeatmapLevel *> overrideData){
             auto data = overrideData ? static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(overrideData) : get_lastInMapList();
@@ -220,6 +247,7 @@ namespace BetterSongList::Hooks {
             self->SetData((System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::BeatmapLevel*>*)data.convert(), favoriteLevelIds, isSorted, !isSorted);
         };
 
+        // If this is true the default Alphabet scrollbar is processed / shown - We dont want that when we use a custom filter
         if (!sorter || sorter->get_isReady()) {
             beatmapLevelsAreSorted = false;
             DEBUG("We have to sort!");
@@ -248,7 +276,21 @@ namespace BetterSongList::Hooks {
     void HookLevelCollectionTableSet::LevelCollectionTableView_SetData_PostFix(GlobalNamespace::LevelCollectionTableView* self, ArrayW<GlobalNamespace::BeatmapLevel*> previewBeatmapLevels) {
         DEBUG("HookLevelCollectionTableSet::PostFix({}, {})", fmt::ptr(self), previewBeatmapLevels ? previewBeatmapLevels.size() : 0);
         lastOutMapList.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(previewBeatmapLevels));
-        if (customLegend.empty()) return;
+        
+        // Basegame already handles cleaning up the legend etc
+        if (customLegend.empty()) {
+            // TODO: Base game issue. Remove when fixed. (Idk, ported cause it was in the original code)
+            if (previewBeatmapLevels.size() == 0) {
+                self->____alphabetScrollbar->get_gameObject()->SetActive(false);
+            }
+            return;
+        };
+
+        /*
+        * We essentially gotta double-init the alphabet scrollbar because basegame
+        * made the great decision to unnecessarily lock down the scrollbar to only
+        * use characters, not strings
+        */
         auto alphabetScrollBar = self->____alphabetScrollbar;
         auto data = ArrayW<GlobalNamespace::AlphabetScrollInfo::Data*>(il2cpp_array_size_t(customLegend.size()));
         DEBUG("Legend size: {}, {}", data->get_Length(), customLegend.size());
@@ -257,6 +299,7 @@ namespace BetterSongList::Hooks {
         DEBUG("Setting data");
         alphabetScrollBar->SetData(reinterpret_cast<System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::AlphabetScrollInfo::Data*>*>(data.convert()));
 
+        // Now that all labels are there we can insert the text we want there...
         DEBUG("making texts");
         ListW<TMPro::TextMeshProUGUI*> texts{alphabetScrollBar->____texts};
         DEBUG("setting values");
@@ -267,6 +310,8 @@ namespace BetterSongList::Hooks {
 
         DEBUG("Legend Clear");
         customLegend.clear();
+
+        // Move the table a bit to the right to accomodate for alphabet scollbar (Basegame behaviour)
         auto tableViewT = self->____tableView->get_transform().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
         auto scrollBarT = alphabetScrollBar->get_transform().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
         tableViewT->set_offsetMin({scrollBarT->get_rect().get_size().x + 1.0f, 0.0f});

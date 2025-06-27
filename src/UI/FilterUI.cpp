@@ -205,7 +205,9 @@ namespace BetterSongList {
             HookLevelCollectionTableSet::sorter = newSort;
             RestoreTableScroll::ResetScroll();
 
-            if (refresh) HookLevelCollectionTableSet::Refresh(true);
+            if (refresh) {
+                HookLevelCollectionTableSet::Refresh(true);
+            } 
         }
 
         auto dropDown = instance->sortDropDown;
