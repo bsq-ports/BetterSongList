@@ -66,12 +66,12 @@
     },
     {
       "id": "bs-cordl",
-      "versionRange": "4006.*",
+      "versionRange": "4007.*",
       "additionalData": {}
     },
     {
       "id": "bsml",
-      "versionRange": "^0.4.53",
+      "versionRange": "^0.4.54",
       "additionalData": {
         "private": true
       }
@@ -104,7 +104,7 @@
     },
     {
       "id": "playlistcore",
-      "versionRange": "^1.5.2",
+      "versionRange": "^1.5.3",
       "additionalData": {}
     },
     {
@@ -129,7 +129,7 @@
     },
     {
       "id": "songcore",
-      "versionRange": "^1.1.22",
+      "versionRange": "^1.1.23",
       "additionalData": {
         "private": true
       }
