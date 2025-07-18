@@ -5,7 +5,7 @@
 #include <map>
 
 namespace BetterSongList {
-
+    std::string toLowercase(const std::string& s);
     template<typename T>
     concept Sorter = std::is_convertible_v<T, ISorter*>;
 

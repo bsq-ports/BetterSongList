@@ -8,14 +8,11 @@
 
 
 namespace BetterSongList {
-    static std::string toLowercase(const std::string& str) {
-        std::string result;
-
-        for (char c : str) {
-            result += std::tolower(c);
-        }
-
-        return result;
+    std::string toLowercase(const std::string& s) {
+        std::string out = s;
+        std::transform(out.begin(), out.end(), out.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+        return out;
     }
 
     static std::string joinArray(ArrayW<StringW>* array, std::string delimiter) {

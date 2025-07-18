@@ -11,4 +11,6 @@ namespace BetterSongList::BeatmapUtils {
     /// @param text The text to clean
     /// @return A cleaned string with only alphanumeric characters, spaces, and hyphens
     std::string CleanText(std::string_view text);
+
+    int CalculateMatchScore(const std::string& levelString, const std::string& text);
 }
