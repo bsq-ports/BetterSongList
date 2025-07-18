@@ -1,10 +1,11 @@
 #include "Patches/ImproveBasegameSearch.hpp"
 #include "config.hpp"
 #include "GlobalNamespace/LevelFilter.hpp"
+#include "Utils/BeatmapUtils.hpp"
 
 #include <map>
 namespace BetterSongList::Hooks {
-    bool ImproveBasegameSearch::LevelFilter_FilterLevelByText_Prefix(System::Collections::Generic::List_1<GlobalNamespace::BeatmapLevel*>* levels, ArrayW<StringW>& searchTexts, System::Collections::Generic::List_1<GlobalNamespace::BeatmapLevel*>*& result) {
+    bool ImproveBasegameSearch::LevelFilter_FilterLevelByText_Prefix(System::Collections::Generic::List_1<GlobalNamespace::BeatmapLevel*>* levels, ArrayW<StringW>& searchTerms, System::Collections::Generic::List_1<GlobalNamespace::BeatmapLevel*>*& result) {
         if (!config.get_modBasegameSearch()) return false;
 
         auto intermediate = std::vector<std::pair<int, GlobalNamespace::BeatmapLevel*>>{};
@@ -12,8 +13,8 @@ namespace BetterSongList::Hooks {
         for(auto i = 0; i < levels->get_Count(); i++) {
             auto level = levels->get_Item(i);
             auto txtToClean = fmt::format("{} {} {} {}", level->___songName, level->___songSubName, level->___songAuthorName, fmt::join(level->___allMappers, " "));
-            auto cleanedText = GlobalNamespace::LevelFilter::CleanText(txtToClean);
-            auto score = GlobalNamespace::LevelFilter::_FilterLevelByText_g__CalculateMatchScore_15_1(cleanedText, searchTexts);
+            auto cleanedText = BeatmapUtils::CleanText(txtToClean);
+            auto score = GlobalNamespace::LevelFilter::_FilterLevelByText_g__CalculateMatchScore_15_1(cleanedText, searchTerms);
             if(score > 0) {
                 intermediate.push_back({score, level});
             }

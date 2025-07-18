@@ -1,6 +1,6 @@
 #include "Utils/BeatmapUtils.hpp"
 #include "logging.hpp"
-
+#include <regex>
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
 
 namespace BetterSongList::BeatmapUtils {
@@ -23,5 +23,11 @@ namespace BetterSongList::BeatmapUtils {
             d = 3;
 
         return d + 1;
+    }
+
+    std::string CleanText(std::string_view text) {
+      static const std::regex specialCharsRegex("[^A-Za-z0-9 -]");
+      std::string result = std::regex_replace(std::string(text), specialCharsRegex, "");
+      return result;
     }
 }
