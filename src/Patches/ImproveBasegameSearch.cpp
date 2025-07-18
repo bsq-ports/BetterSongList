@@ -22,7 +22,6 @@ namespace BetterSongList::Hooks {
             searchTermsVec.push_back(static_cast<std::string>(term));
         }
         auto preparedSearchString = BetterSongList::toLowercase(fmt::format("{}", fmt::join(searchTermsVec, " ")));
-        DEBUG("Searching for: {}", preparedSearchString.c_str());
 
         auto count = levels->get_Count();
         for(auto i = 0; i < count; i++) {
@@ -39,8 +38,6 @@ namespace BetterSongList::Hooks {
             
             auto score = BeatmapUtils::CalculateMatchScore(cleanedTextLowercase, preparedSearchString);
             if(score > 0) {
-                DEBUG("Found match for {} with score {}",
-                      fmt::format("{} - {}", (std::string) level->___songName, (std::string) level->___songSubName).c_str(), score);
                 intermediate.push_back({score, level});
             }
         }
