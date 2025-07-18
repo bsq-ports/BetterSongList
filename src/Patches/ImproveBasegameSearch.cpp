@@ -50,16 +50,11 @@ namespace BetterSongList::Hooks {
             return a.first > b.first;
         });
 
-        ListW<GlobalNamespace::BeatmapLevel*> resultLevels = ListW<GlobalNamespace::BeatmapLevel*>::New();
+        result->Clear();
 
         for(auto& [score, level] : intermediate) {
-            resultLevels.push_back(level);
+            result->Add(level);
         }
-
-        result = resultLevels;
-
-        DEBUG("Returning {} results", resultLevels.size());
-
         return true;
     }
 }
