@@ -50,7 +50,7 @@
         "pwsh ./scripts/validate-modjson.ps1 $0:?"
       ]
     },
-    "ndk": "^27.2.12479018",
+    "ndk": "^27.3.13750724",
     "qmodIncludeDirs": [
       "build",
       "extern/libs"
@@ -66,12 +66,12 @@
     },
     {
       "id": "bs-cordl",
-      "versionRange": "4007.*",
+      "versionRange": "4008.*",
       "additionalData": {}
     },
     {
       "id": "bsml",
-      "versionRange": "^0.4.54",
+      "versionRange": "^0.4.55",
       "additionalData": {
         "private": true
       }
@@ -104,7 +104,7 @@
     },
     {
       "id": "playlistcore",
-      "versionRange": "^1.5.3",
+      "versionRange": "^1.5.5",
       "additionalData": {}
     },
     {
@@ -129,7 +129,7 @@
     },
     {
       "id": "songcore",
-      "versionRange": "^1.1.23",
+      "versionRange": "^1.1.24",
       "additionalData": {
         "private": true
       }
