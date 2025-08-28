@@ -30,6 +30,7 @@
 #include <optional>
 #include <sstream>
 #include <future>
+#include "songcore/shared/SongCore.hpp"
 
 
 namespace BetterSongList::Hooks {
@@ -103,6 +104,12 @@ namespace BetterSongList::Hooks {
 
     void HookLevelCollectionTableSet::FilterWrapper(ArrayW<GlobalNamespace::BeatmapLevel*>& previewBeatmapLevels) {
         if (!previewBeatmapLevels) {
+            return;
+        }
+
+        // If SongCore didn't load, don't do anything yet
+        // TODO: Make it thread safe instead and discard the result or implement loading state
+        if (!SongCore::API::Loading::AreSongsLoaded()) {
             return;
         }
 
