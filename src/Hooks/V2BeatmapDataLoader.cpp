@@ -10,6 +10,8 @@
 #include "BeatmapSaveDataVersion2_6_0AndEarlier/NoteType.hpp"
 #include "GlobalNamespace/BeatmapDataBasicInfo.hpp"
 #include "UnityEngine/JsonUtility.hpp"
+#include "logging.hpp"
+#include <cstddef>
 
 // from UI/SongDeleteButton
 // from UI/ExtraLevelParams
@@ -21,7 +23,16 @@ MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion2_6_0AndEarlier_BeatmapDataLoader_G
     {
         return nullptr;
     }
-    BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData* beatmapSaveData = UnityEngine::JsonUtility::FromJson<BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData*>(beatmapJson);
+
+    // This can throw, so we catch
+    BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData* beatmapSaveData;
+    try {
+        beatmapSaveData = UnityEngine::JsonUtility::FromJson<BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData*>(beatmapJson);
+    } catch (...) {
+        DEBUG("Failed to parse beatmap JSON");
+        return nullptr;
+    }
+
     if (beatmapSaveData == nullptr)
     {
         return nullptr;
