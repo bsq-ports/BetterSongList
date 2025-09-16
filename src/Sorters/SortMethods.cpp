@@ -43,6 +43,35 @@ namespace BetterSongList {
         }
     );
 
+    static ComparableFunctionSorterWithLegend alphabeticalSongAuthorName(
+        [](auto a, auto b) -> int {
+            std::string authorA = toLowercase(
+                std::string(a->songAuthorName).empty()
+                ? (a->allMappers.size() > 0 ? static_cast<std::string>(a->allMappers[0]) : "")
+                : static_cast<std::string>(a->songAuthorName)
+            );
+            std::string authorB = toLowercase(
+                std::string(b->songAuthorName).empty()
+                ? (b->allMappers.size() > 0 ? static_cast<std::string>(b->allMappers[0]) : "")
+                : static_cast<std::string>(b->songAuthorName)
+            );
+
+            if (authorA == authorB) {
+                return toLowercase(a->songName) < toLowercase(b->songName);
+            }
+
+            return authorA < authorB;
+        },
+        [](GlobalNamespace::BeatmapLevel* song) -> std::string {
+            std::string author = toLowercase(
+                std::string(song->songAuthorName).empty()
+                ? (song->allMappers.size() > 0 ? static_cast<std::string>(song->allMappers[0]) : "")
+                : static_cast<std::string>(song->songAuthorName)
+            );
+            return author.size() > 0 ? author.substr(0, 1) : "";
+        }
+    );
+
     static PrimitiveFunctionSorterWithLegend bpm(
         [](auto song){
             return song->beatsPerMinute;
@@ -152,14 +181,15 @@ namespace BetterSongList {
     }
 
     std::map<std::string, ISorter*> SortMethods::methods{
-		{"Song Name", &alphabeticalSongname},
-		{"Mapper Name", &alphabeticalMapper},
-		{"Download Date", &downloadTime},
+        {"Song Name", &alphabeticalSongname},
+        {"Song Author Name", &alphabeticalSongAuthorName},
+        {"Mapper Name", &alphabeticalMapper},
+        {"Download Date", &downloadTime},
         {"BL Stars", &blstars},
-		{"SS Stars", &stars},
-		{"Song Length", &songLength},
-		{"BPM", &bpm},
-		{"BeatSaver Date", &beatSaverDate},
-		{"Default", nullptr}
+        {"SS Stars", &stars},
+        {"Song Length", &songLength},
+        {"BPM", &bpm},
+        {"BeatSaver Date", &beatSaverDate},
+        {"Default", nullptr}
     };
 }
