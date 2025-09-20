@@ -38,8 +38,8 @@ namespace BetterSongList {
             return toLowercase(a->songName) < toLowercase(b->songName);
         },
         [](GlobalNamespace::BeatmapLevel* song) -> std::string {
-            std::string songName = toLowercase(song->songName);
-            return songName.size() > 0 ? songName.substr(0, 1) : "";
+            std::string songName = song->songName;
+            return songName.size() > 0 ? toLowercase(songName.substr(0, 1)) : "";
         }
     );
 
@@ -63,12 +63,21 @@ namespace BetterSongList {
             return authorA < authorB;
         },
         [](GlobalNamespace::BeatmapLevel* song) -> std::string {
-            std::string author = toLowercase(
-                std::string(song->songAuthorName).empty()
-                ? (song->allMappers.size() > 0 ? static_cast<std::string>(song->allMappers[0]) : "")
-                : static_cast<std::string>(song->songAuthorName)
-            );
-            return author.size() > 0 ? author.substr(0, 1) : "";
+            std::string authorString = song->songAuthorName;
+
+            if (authorString.empty()) {
+                if (song->allMappers.size() > 0) {
+                    authorString = static_cast<std::string>(song->allMappers[0]);
+                } else {
+                    return "";
+                }
+            }
+
+            if (authorString.empty()) {
+                return "";
+            }
+
+            return toLowercase(authorString.substr(0, 1));
         }
     );
 
@@ -87,7 +96,7 @@ namespace BetterSongList {
         },
         [](auto song) -> std::string {
             std::string levelAuthor{static_cast<std::string>(song->allMappers.size() > 0 ? song->allMappers[0] : "")};
-            return levelAuthor.size() > 0 ? levelAuthor.substr(0, 1) : "";
+            return levelAuthor.size() > 0 ? toLowercase(levelAuthor.substr(0, 1)) : "";
         }
     );
 
