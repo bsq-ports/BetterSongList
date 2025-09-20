@@ -38,8 +38,46 @@ namespace BetterSongList {
             return toLowercase(a->songName) < toLowercase(b->songName);
         },
         [](GlobalNamespace::BeatmapLevel* song) -> std::string {
-            std::string songName = toLowercase(song->songName);
-            return songName.size() > 0 ? songName.substr(0, 1) : "";
+            std::string songName = song->songName;
+            return songName.size() > 0 ? toLowercase(songName.substr(0, 1)) : "";
+        }
+    );
+
+    static ComparableFunctionSorterWithLegend alphabeticalSongAuthorName(
+        [](auto a, auto b) -> int {
+            std::string authorA = toLowercase(
+                std::string(a->songAuthorName).empty()
+                ? (a->allMappers.size() > 0 ? static_cast<std::string>(a->allMappers[0]) : "")
+                : static_cast<std::string>(a->songAuthorName)
+            );
+            std::string authorB = toLowercase(
+                std::string(b->songAuthorName).empty()
+                ? (b->allMappers.size() > 0 ? static_cast<std::string>(b->allMappers[0]) : "")
+                : static_cast<std::string>(b->songAuthorName)
+            );
+
+            if (authorA == authorB) {
+                return toLowercase(a->songName) < toLowercase(b->songName);
+            }
+
+            return authorA < authorB;
+        },
+        [](GlobalNamespace::BeatmapLevel* song) -> std::string {
+            std::string authorString = song->songAuthorName;
+
+            if (authorString.empty()) {
+                if (song->allMappers.size() > 0) {
+                    authorString = static_cast<std::string>(song->allMappers[0]);
+                } else {
+                    return "";
+                }
+            }
+
+            if (authorString.empty()) {
+                return "";
+            }
+
+            return toLowercase(authorString.substr(0, 1));
         }
     );
 
@@ -58,7 +96,7 @@ namespace BetterSongList {
         },
         [](auto song) -> std::string {
             std::string levelAuthor{static_cast<std::string>(song->allMappers.size() > 0 ? song->allMappers[0] : "")};
-            return levelAuthor.size() > 0 ? levelAuthor.substr(0, 1) : "";
+            return levelAuthor.size() > 0 ? toLowercase(levelAuthor.substr(0, 1)) : "";
         }
     );
 
@@ -152,14 +190,15 @@ namespace BetterSongList {
     }
 
     std::map<std::string, ISorter*> SortMethods::methods{
-		{"Song Name", &alphabeticalSongname},
-		{"Mapper Name", &alphabeticalMapper},
-		{"Download Date", &downloadTime},
+        {"Song Name", &alphabeticalSongname},
+        {"Song Author Name", &alphabeticalSongAuthorName},
+        {"Mapper Name", &alphabeticalMapper},
+        {"Download Date", &downloadTime},
         {"BL Stars", &blstars},
-		{"SS Stars", &stars},
-		{"Song Length", &songLength},
-		{"BPM", &bpm},
-		{"BeatSaver Date", &beatSaverDate},
-		{"Default", nullptr}
+        {"SS Stars", &stars},
+        {"Song Length", &songLength},
+        {"BPM", &bpm},
+        {"BeatSaver Date", &beatSaverDate},
+        {"Default", nullptr}
     };
 }
