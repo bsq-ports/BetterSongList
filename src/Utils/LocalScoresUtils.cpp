@@ -83,7 +83,7 @@ namespace BetterSongList::LocalScoresUtils {
         levelData->AddRange(stats);
         
         if (levelData) {
-            std::thread([](ListW<GlobalNamespace::PlayerLevelStatsData*> levelData){
+            il2cpp_utils::il2cpp_aware_thread([](ListW<GlobalNamespace::PlayerLevelStatsData*> levelData){
                 INFO("x1");
                 for (auto x : levelData) {
                     INFO("{}", fmt::ptr(x));
