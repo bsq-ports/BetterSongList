@@ -10,7 +10,8 @@
   "coverImage": "cover.jpg",
   "description": "Improvement upon SongBrowser with similiar functionality",
   "dependencies": [],
-  "modFiles": [
+  "modFiles": [],
+  "lateModFiles": [
     "${binary}"
   ],
   "libraryFiles": [],
