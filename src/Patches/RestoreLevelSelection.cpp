@@ -22,7 +22,6 @@
 #include <string>
 
 namespace BetterSongList::Hooks {
-    std::string RestoreLevelSelection::restoredPackId;
     SafePtr<GlobalNamespace::BeatmapLevelPack> RestoreLevelSelection::restoredPack;
 
     GlobalNamespace::BeatmapLevelPack* RestoreLevelSelection::get_restoredPack() {
@@ -54,11 +53,6 @@ namespace BetterSongList::Hooks {
 
         LoadPackFromCollectionName(levelsModel);
         
-        // Get restored pack
-        auto startPack = startState ? startState->beatmapLevelPack : nullptr;
-        auto startPackId = startPack ? startPack->packID : nullptr;
-        restoredPackId = startPackId ? static_cast<std::string>(startPackId) : "";
-        
         if (
             restoreCategory == GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::All || 
             restoreCategory == GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::Favorites || 
@@ -68,6 +62,15 @@ namespace BetterSongList::Hooks {
         }
 
         if (m) {
+            // if the level is custom and we're trying to restore to music packs, switch to customsongs
+            // TODO: Maybe check if we actually have the level in the pack?
+            auto customLevel = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(m).value_or(nullptr);
+            if (customLevel) {
+                if (restoreCategory == GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::MusicPacks) {
+                    restoreCategory = GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::CustomSongs;
+                }
+            }
+
             auto levelCategory = System::Nullable_1<GlobalNamespace::SelectLevelCategoryViewController::LevelCategory>();
             levelCategory.value = restoreCategory;
             levelCategory.hasValue = true;

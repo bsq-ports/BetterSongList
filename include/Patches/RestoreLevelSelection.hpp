@@ -15,7 +15,6 @@ namespace BetterSongList::Hooks {
             static GlobalNamespace::BeatmapLevelPack* get_restoredPack();
         private:
             static void LoadPackFromCollectionName(GlobalNamespace::BeatmapLevelsModel* levelsModel);
-            static std::string restoredPackId;
             static SafePtr<GlobalNamespace::BeatmapLevelPack> restoredPack;
     };
 }
