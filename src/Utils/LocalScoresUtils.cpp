@@ -6,11 +6,12 @@
 #include "bsml/shared/BSML/SharedCoroutineStarter.hpp"
 #include "System/Collections/Generic/List_1.hpp"
 #include "System/Collections/Generic/Dictionary_2.hpp"
-
+#include "hooking.hpp"
 #include "logging.hpp"
 
 #include "custom-types/shared/coroutine.hpp"
 #include <atomic>
+#include <mutex>
 #include <string>
 #include <unordered_set>
 
@@ -92,3 +93,12 @@ namespace BetterSongList::LocalScoresUtils {
         }
     }
 }
+
+MAKE_AUTO_HOOK_MATCH(PlayerLevelStatsData_UpdateScoreData, &GlobalNamespace::PlayerLevelStatsData::UpdateScoreData,  void, GlobalNamespace::PlayerLevelStatsData* self, int32_t score, int32_t maxCombo, bool fullCombo, ::GlobalNamespace::RankModel_Rank rank) {
+    // Will become valid after this call
+    if (!self->_validScore) {
+        std::unique_lock<std::shared_mutex> lock(BetterSongList::LocalScoresUtils::mutex_playedMaps);
+        BetterSongList::LocalScoresUtils::playedMaps.insert(static_cast<std::string>(self->levelID));
+    }
+    PlayerLevelStatsData_UpdateScoreData(self, score, maxCombo, fullCombo, rank);
+};
