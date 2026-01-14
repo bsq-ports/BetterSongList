@@ -10,6 +10,8 @@
 #include "GlobalNamespace/BeatmapLevel.hpp"
 #include "GlobalNamespace/BeatmapKey.hpp"
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
+#include "GlobalNamespace/PlayerDataModel.hpp"
+#include "GlobalNamespace/PlayerData.hpp"
 #include "GlobalNamespace/LevelSelectionNavigationController.hpp"
 #include "GlobalNamespace/LevelFilteringNavigationController.hpp"
 #include "GlobalNamespace/BeatmapLevelsModel.hpp"
@@ -71,10 +73,30 @@ namespace BetterSongList::Hooks {
                 }
             }
 
+            // Check if the level is favorited, if not switch to all (might never happen but just in case)
+            // Can happen if you didn't load all the levels, switched to favorites and reentered the songlist
+            if (restoreCategory == GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::Favorites) {
+                auto playerDataModel = self->___playerDataModel;
+                if (playerDataModel) {
+                    auto playerData = playerDataModel->get_playerData();
+                    if (playerData) {
+                        if (!playerData->IsLevelUserFavorite(customLevel)) {
+                            restoreCategory = GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::All;
+                        }
+                    } else {
+                        WARNING("Could not get playerData when trying to check for favorite status, setting to all");
+                        restoreCategory = GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::All;
+                    }
+                } else {
+                    WARNING("Could not get playerDataModel when trying to check for favorite status, setting to all");
+                    restoreCategory = GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::All;
+                }
+            }
+
+            // Construct the new state
             auto levelCategory = System::Nullable_1<GlobalNamespace::SelectLevelCategoryViewController::LevelCategory>();
             levelCategory.value = restoreCategory;
             levelCategory.hasValue = true;
-
             auto state = GlobalNamespace::LevelSelectionFlowCoordinator::State::New_ctor(
                     restoredPack ? restoredPack.ptr() : nullptr,
                     static_cast<GlobalNamespace::BeatmapLevel *>(m)
@@ -82,7 +104,19 @@ namespace BetterSongList::Hooks {
 
             state->___levelCategory = levelCategory;
             startState = state;
-        }     
+        } else {
+            // If no level found, just restore pack and category for now
+            auto levelCategory = System::Nullable_1<GlobalNamespace::SelectLevelCategoryViewController::LevelCategory>();
+            levelCategory.value = restoreCategory;
+            levelCategory.hasValue = true;
+            auto state = GlobalNamespace::LevelSelectionFlowCoordinator::State::New_ctor(
+                restoredPack ? restoredPack.ptr() : nullptr,
+                nullptr
+            );
+
+            state->___levelCategory = levelCategory;
+            startState = state;
+        }
     }
 
     void RestoreLevelSelection::LoadPackFromCollectionName(GlobalNamespace::BeatmapLevelsModel* levelsModel) {
