@@ -24,6 +24,8 @@ namespace BetterSongList::LocalScoresUtils {
     std::shared_mutex mutex_playedMaps;
     // Check if scores have been loaded into the map 
     std::atomic<bool> loadedScores = false;
+    // Is loading scores right now
+    static std::atomic<bool> isLoadingScores = false;
 
     GlobalNamespace::PlayerDataModel* get_playerDataModel() {
         if (!playerDataModel || !playerDataModel.ptr()) {
@@ -46,44 +48,34 @@ namespace BetterSongList::LocalScoresUtils {
 
     bool HasLocalScore(GlobalNamespace::BeatmapLevel* level) {
         if (!level) return false;
-        std::shared_lock<std::shared_mutex> lock(mutex_playedMaps);
         auto levelId = level->levelID;
         return levelId ? HasLocalScore(levelId) : false;
     }
 
-    static std::atomic<bool> isLoadingScores = false;
 
     void Load() {
         // If aleady loading or don't have scores, skip
         if (isLoadingScores || !get_playerDataModel()) return;
         isLoadingScores = true;
         auto playerDataModel = get_playerDataModel();
-        INFO("{}", fmt::ptr(playerDataModel));
         auto playerData = playerDataModel ? playerDataModel->get_playerData() : nullptr;
-        INFO("{}", fmt::ptr(playerData));
+        if (!playerData) {
+            isLoadingScores = false;
+            return;
+        }
         auto levelData = ListW<GlobalNamespace::PlayerLevelStatsData*>::New();
         auto stats = playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr;
-        INFO("{}", fmt::ptr(stats));
         levelData->AddRange(stats);
     
         if (levelData) {
             il2cpp_utils::il2cpp_aware_thread([](ListW<GlobalNamespace::PlayerLevelStatsData*> levelData){
-                INFO("x1");
-                
-                std::unordered_set<std::string> tempPlayedMaps;
-                tempPlayedMaps.reserve(500);
+                std::unique_lock<std::shared_mutex> lock(BetterSongList::LocalScoresUtils::mutex_playedMaps);
+                playedMaps.reserve(500);
 
                 for (auto x : levelData) {
-                    if (!x->validScore) continue;
+                    if (!x->_validScore) continue;
                     auto levelId = static_cast<std::string>(x->levelID);
-
-                    tempPlayedMaps.insert(levelId);
-                }
-
-                // Swap in the new set
-                {
-                    std::unique_lock<std::shared_mutex> lock(mutex_playedMaps);
-                    playedMaps.swap(tempPlayedMaps);
+                    playedMaps.insert(levelId);
                 }
 
                 isLoadingScores = false;
