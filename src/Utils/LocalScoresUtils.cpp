@@ -74,7 +74,6 @@ namespace BetterSongList::LocalScoresUtils {
                 tempPlayedMaps.reserve(500);
 
                 for (auto x : levelData) {
-                    INFO("{}", fmt::ptr(x));
                     if (!x->validScore) continue;
                     auto levelId = static_cast<std::string>(x->levelID);
 
