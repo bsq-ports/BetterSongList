@@ -30,7 +30,7 @@ namespace BetterSongList::BeatmapUtils {
 
     std::string GetHashOfPreview(GlobalNamespace::BeatmapLevel* level) {
         if (!level) return "";
-        auto levelId = static_cast<std::string>(level->levelID);
+        auto levelId = static_cast<std::string>(level->___levelID);
         if (levelId.size() < 53) return "";
         if (levelId[12] != '_') return "";
         return levelId.substr(13, 40);

@@ -41,7 +41,7 @@ namespace BetterSongList {
     }
 
     void FolderDateSorter::OnSongWillBeDeleted(SongCore::SongLoader::CustomBeatmapLevel* customLevel) {
-        songTimes.erase(customLevel->levelID);
+        songTimes.erase(customLevel->___levelID);
     }
 
     void FolderDateSorter::GatherFolderInfoThread(bool fullReload) {
@@ -49,7 +49,7 @@ namespace BetterSongList {
         auto levels = SongCore::API::Loading::GetAllLevels();
 
         for (auto level : levels) {
-            std::string levelID = level->levelID;
+            std::string levelID = level->___levelID;
             auto itr = songTimes.find(levelID);
             if (itr != songTimes.end() && !fullReload) continue;
 
@@ -84,7 +84,7 @@ namespace BetterSongList {
     }
 
     std::optional<float> FolderDateSorter::GetValueFor(GlobalNamespace::BeatmapLevel* level) const {
-		std::string levelId = level ? level->levelID : "";
+		std::string levelId = level ? level->___levelID : "";
         if (levelId.empty()) return std::nullopt;
         auto itr = songTimes.find(levelId);
         if (itr != songTimes.end()) return itr->second;
@@ -94,7 +94,7 @@ namespace BetterSongList {
     ISorterWithLegend::Legend FolderDateSorter::BuildLegend(ArrayW<GlobalNamespace::BeatmapLevel*> levels) const {
         time_t now = time(NULL);
         return SongListLegendBuilder::BuildFor(levels, [now](GlobalNamespace::BeatmapLevel* level) -> std::string {
-            std::string levelId = level ? level->levelID : "";
+            std::string levelId = level ? level->___levelID : "";
             if (levelId.empty()) return "";
             auto itr = songTimes.find(levelId);
             if (itr == songTimes.end()) return "";
