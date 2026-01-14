@@ -27,6 +27,11 @@ namespace BetterSongList::LocalScoresUtils {
     // Is loading scores right now
     static std::atomic<bool> isLoadingScores = false;
 
+    /**
+     * @brief Get the playerDataModel object and cache it
+     * 
+     * @return GlobalNamespace::PlayerDataModel* 
+     */
     GlobalNamespace::PlayerDataModel* get_playerDataModel() {
         if (!playerDataModel || !playerDataModel.ptr()) {
             playerDataModel = UnityEngine::Object::FindObjectOfType<GlobalNamespace::PlayerDataModel*>();
@@ -48,40 +53,48 @@ namespace BetterSongList::LocalScoresUtils {
 
     bool HasLocalScore(GlobalNamespace::BeatmapLevel* level) {
         if (!level) return false;
-        auto levelId = level->levelID;
+        auto levelId = level->___levelID;
         return levelId ? HasLocalScore(levelId) : false;
     }
 
 
     void Load() {
         // If aleady loading or don't have scores, skip
+        // get_playerDataModel() will set playerDataModel if not set, it i
         if (isLoadingScores || !get_playerDataModel()) return;
         isLoadingScores = true;
-        auto playerDataModel = get_playerDataModel();
-        auto playerData = playerDataModel ? playerDataModel->get_playerData() : nullptr;
-        if (!playerData) {
-            isLoadingScores = false;
-            return;
-        }
-        auto levelData = ListW<GlobalNamespace::PlayerLevelStatsData*>::New();
-        auto stats = playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr;
-        levelData->AddRange(stats);
-    
-        if (levelData) {
-            il2cpp_utils::il2cpp_aware_thread([](ListW<GlobalNamespace::PlayerLevelStatsData*> levelData){
+        
+        il2cpp_utils::il2cpp_aware_thread([](){
+            try {
+                auto playerData = playerDataModel ? playerDataModel->_playerData : nullptr;
+                if (!playerData) {
+                    WARNING("LocalScoresUtils::Load() => No player data found, cannot load local scores");
+                    isLoadingScores = false;
+                    return;
+                }
+
+                // Get all level stats data
+                auto levelData = ListW<GlobalNamespace::PlayerLevelStatsData*>::New();
+                auto stats = playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr;
+                levelData->AddRange(stats);
+                
+                // Populate playedMaps
                 std::unique_lock<std::shared_mutex> lock(BetterSongList::LocalScoresUtils::mutex_playedMaps);
                 playedMaps.reserve(500);
-
                 for (auto x : levelData) {
                     if (!x->_validScore) continue;
-                    auto levelId = static_cast<std::string>(x->levelID);
+                    auto levelId = static_cast<std::string>(x->_levelID);
                     playedMaps.insert(levelId);
                 }
 
                 isLoadingScores = false;
                 loadedScores = true;
-            }, levelData).detach();
-        }
+            } catch (...) {
+                ERROR("LocalScoresUtils::Load() => Exception during loading local scores");
+                isLoadingScores = false;
+                return;
+            }
+        }).detach();
     }
 }
 
@@ -89,7 +102,7 @@ MAKE_AUTO_HOOK_MATCH(PlayerLevelStatsData_UpdateScoreData, &GlobalNamespace::Pla
     // Will become valid after this call
     if (!self->_validScore) {
         std::unique_lock<std::shared_mutex> lock(BetterSongList::LocalScoresUtils::mutex_playedMaps);
-        BetterSongList::LocalScoresUtils::playedMaps.insert(static_cast<std::string>(self->levelID));
+        BetterSongList::LocalScoresUtils::playedMaps.insert(static_cast<std::string>(self->_levelID));
     }
     PlayerLevelStatsData_UpdateScoreData(self, score, maxCombo, fullCombo, rank);
 };
