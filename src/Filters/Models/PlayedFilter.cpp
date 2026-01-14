@@ -16,9 +16,9 @@ namespace BetterSongList {
 
     std::future<void> PlayedFilter::Prepare() {
             BSML::MainThreadScheduler::Schedule(LocalScoresUtils::Load);
-        return std::async(std::launch::deferred, [this](){
-            while (!this->get_isReady()) std::this_thread::yield();
-        });
+            return std::async(std::launch::deferred, [this](){
+                while (!this->get_isReady()) std::this_thread::yield();
+            });
     }
 
     bool PlayedFilter::GetValueFor(GlobalNamespace::BeatmapLevel* level) { 

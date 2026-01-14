@@ -10,19 +10,19 @@
 #include "logging.hpp"
 
 #include "custom-types/shared/coroutine.hpp"
+#include <atomic>
+#include <string>
+#include <unordered_set>
 
 #define COROUTINE(coroutine) BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(coroutine));
 
 namespace BetterSongList::LocalScoresUtils {
     SafePtrUnity<GlobalNamespace::PlayerDataModel> playerDataModel;
 
-    struct PlayedMaps : std::vector<std::string> {
-        PlayedMaps(int count) : std::vector<std::string>() { reserve(count); }
-        auto find(const std::string& str) { return std::find(begin(), end(), str); }
-        const auto find(const std::string& str) const { return std::find(begin(), end(), str); }
-    };
-
-    PlayedMaps playedMaps(500);
+    std::unordered_set<std::string> playedMaps;
+    std::shared_mutex mutex_playedMaps;
+    // Check if scores have been loaded into the map 
+    std::atomic<bool> loadedScores = false;
 
     GlobalNamespace::PlayerDataModel* get_playerDataModel() {
         if (!playerDataModel || !playerDataModel.ptr()) {
@@ -32,46 +32,29 @@ namespace BetterSongList::LocalScoresUtils {
     }
 
     bool get_hasScores() {
-        return get_playerDataModel();
+        return loadedScores;
     }
 
     bool HasLocalScore(std::string levelId) {
+        std::shared_lock<std::shared_mutex> lock(mutex_playedMaps);
         if (playedMaps.find(levelId) != playedMaps.end()) {
             return true;
-        }
-
-        auto playerDataModel = get_playerDataModel();
-
-        auto playerData = playerDataModel ? playerDataModel->playerData : nullptr;
-        auto levelData = ListW<GlobalNamespace::PlayerLevelStatsData*>::New();
-        auto stats = playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr;
-        INFO("{}", fmt::ptr(stats));
-        levelData->AddRange(stats);
-        if (!levelData) {
-            return false;
-        }
-
-        // only iterate the new entries
-        for (int i = levelData.size(); i-- > playedMaps.size();) {
-            auto x = levelData[i];
-            if (x->validScore && x->levelID == levelId) {
-                playedMaps.push_back(levelId);
-                return true;
-            }
         }
         return false;
     }
 
     bool HasLocalScore(GlobalNamespace::BeatmapLevel* level) {
         if (!level) return false;
+        std::shared_lock<std::shared_mutex> lock(mutex_playedMaps);
         auto levelId = level->levelID;
         return levelId ? HasLocalScore(levelId) : false;
     }
 
-    static bool isLoadingScores = false;
+    static std::atomic<bool> isLoadingScores = false;
 
     void Load() {
-        if (isLoadingScores || get_hasScores()) return;
+        // If aleady loading or don't have scores, skip
+        if (isLoadingScores || !get_playerDataModel()) return;
         isLoadingScores = true;
         auto playerDataModel = get_playerDataModel();
         INFO("{}", fmt::ptr(playerDataModel));
@@ -81,20 +64,30 @@ namespace BetterSongList::LocalScoresUtils {
         auto stats = playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr;
         INFO("{}", fmt::ptr(stats));
         levelData->AddRange(stats);
-        
+    
         if (levelData) {
             il2cpp_utils::il2cpp_aware_thread([](ListW<GlobalNamespace::PlayerLevelStatsData*> levelData){
                 INFO("x1");
+                
+                std::unordered_set<std::string> tempPlayedMaps;
+                tempPlayedMaps.reserve(500);
+
                 for (auto x : levelData) {
                     INFO("{}", fmt::ptr(x));
                     if (!x->validScore) continue;
                     auto levelId = static_cast<std::string>(x->levelID);
-                    if (playedMaps.find(levelId) == playedMaps.end()) {
-                        playedMaps.emplace_back(levelId);
-                    }
+
+                    tempPlayedMaps.insert(levelId);
+                }
+
+                // Swap in the new set
+                {
+                    std::unique_lock<std::shared_mutex> lock(mutex_playedMaps);
+                    playedMaps.swap(tempPlayedMaps);
                 }
 
                 isLoadingScores = false;
+                loadedScores = true;
             }, levelData).detach();
         }
     }
