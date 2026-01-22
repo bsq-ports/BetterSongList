@@ -80,7 +80,7 @@ namespace BetterSongList::Hooks {
                 if (playerDataModel) {
                     auto playerData = playerDataModel->get_playerData();
                     if (playerData) {
-                        if (!playerData->IsLevelUserFavorite(customLevel)) {
+                        if (!playerData->IsLevelUserFavorite(m)) {
                             restoreCategory = GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::All;
                         }
                     } else {
