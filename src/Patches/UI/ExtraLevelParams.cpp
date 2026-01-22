@@ -114,6 +114,17 @@ namespace BetterSongList::Hooks {
         return monthsDiff;
     }
 
+    bool isBeatleaderLoaded() {
+        static bool checked = false;
+        static bool loaded = false;
+        if (!checked) {
+            CModInfo beatLeaderModInfo = {"bl"};
+            loaded = modloader_get_mod(&beatLeaderModInfo, CMatchType::MatchType_IdOnly).handle != nullptr;
+            checked = true;
+        }
+        return loaded;
+    }
+
     void ExtraLevelParams::StandardLevelDetailView_RefreshContent_Postfix(GlobalNamespace::StandardLevelDetailView* self, GlobalNamespace::BeatmapLevel* level, GlobalNamespace::BeatmapKey selectedDifficultyBeatmap, GlobalNamespace::LevelParamsPanel* levelParamsPanel) {
         if (!get_extraUI() || !get_extraUI()->___m_CachedPtr.m_value) {
             extraUI = UnityEngine::Object::Instantiate(levelParamsPanel->get_gameObject(), levelParamsPanel->get_transform()->get_parent());
@@ -142,10 +153,14 @@ namespace BetterSongList::Hooks {
             };
 
             auto pos = levelParamsPanel->get_transform()->get_localPosition();
-            pos.y += 3.5f;
+
+            // If we have beatleader, move down a bit more
+            bool blLoaded = isBeatleaderLoaded();
+
+            pos.y += blLoaded ? 2.5f : 3.5f;
             levelParamsPanel->get_transform()->set_localPosition(pos);
             pos = extraUI->get_transform()->get_localPosition();
-            pos.y -= 1.0f;
+            pos.y -= blLoaded ? 2.5f: 1.0f;
             extraUI->get_transform()->set_localPosition(pos);
 
             fields.emplace(static_cast<Array<TMPro::TextMeshProUGUI*>*>(extraUI->GetComponentsInChildren<HMUI::CurvedTextMeshPro*>(true).convert()));
