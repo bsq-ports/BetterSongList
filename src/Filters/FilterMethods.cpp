@@ -33,6 +33,15 @@ namespace BetterSongList {
         return hasFlags(x->uploadFlags, SongDetailsCache::UploadFlags::HasV3Environment);
     });
 
+    static BasicSongDetailsFilter vivify([](const SongDetailsCache::Song* x){
+        for (auto const& diff : *x) {
+            if (hasFlags(diff.mods, SongDetailsCache::MapMods::Vivify)) {
+                return true;
+            }
+        }
+        return false;
+    });
+
     static BasicSongDetailsFilter onBeatsaver([](const SongDetailsCache::Song* x) { return true; });
 
     static PlayedFilter unplayed(true);
@@ -75,6 +84,7 @@ namespace BetterSongList {
 		{"No Requirements", &noRequirements},
 		{"Unranked", &unranked},
         {"V3 Environment", &v3},
+        {"Vivify", &vivify},
 		{"All", nullptr}
     };
 }
