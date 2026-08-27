@@ -25,6 +25,7 @@
 
 #include "UI/FilterUI.hpp"
 #include <algorithm>
+#include <atomic>
 #include <cstddef>
 #include <cxxabi.h>
 #include <optional>
@@ -175,7 +176,7 @@ namespace BetterSongList::Hooks {
     }
 
 
-    static std::shared_ptr<bool> doCancelSort;
+    static std::shared_ptr<std::atomic_bool> doCancelSort;
 
     bool HookLevelCollectionTableSet::PrepareStuffIfNecessary(std::function<void()> cb, bool cbOnAlreadyPrepared) {
         INFO("PrepareStuffIfNecessary({}, {})", cb != nullptr, cbOnAlreadyPrepared);
@@ -187,14 +188,14 @@ namespace BetterSongList::Hooks {
                 indicator->get_gameObject()->SetActive(true);
             }
 
-            if (doCancelSort.use_count() > 0) {
-                *doCancelSort.get() = true;
+            if (doCancelSort) {
+                doCancelSort->store(true, std::memory_order_release);
                 doCancelSort.reset();
             }
 
-            doCancelSort = std::make_shared<bool>(false);
+            doCancelSort = std::make_shared<std::atomic_bool>(false);
             DEBUG("PrepareStuffIfNecessary()");
-            std::thread([cb](std::weak_ptr<bool> thisDoCancelSort){
+            std::thread([cb](std::weak_ptr<std::atomic_bool> thisDoCancelSort){
                 if (sorter && !sorter->get_isReady()) { 
                     sorter->Prepare().wait();
                 }
@@ -204,12 +205,13 @@ namespace BetterSongList::Hooks {
                 }
 
                 DEBUG("ContinueWith");
-                if (thisDoCancelSort.expired()) {
+                auto cancelSort = thisDoCancelSort.lock();
+                if (!cancelSort) {
                     INFO("sort was cancelled by invalidated weak_ptr");
                     return;
                 }
 
-                if (!*thisDoCancelSort.lock().get() && cb) {
+                if (!cancelSort->load(std::memory_order_acquire) && cb) {
                     // main thread because cb possibly does main thread things
                     BSML::MainThreadScheduler::Schedule(cb);
                 }

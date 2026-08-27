@@ -2,7 +2,10 @@
 
 #include "ISorter.hpp"
 #include "GlobalNamespace/BeatmapLevel.hpp"
+#include <atomic>
+#include <ctime>
 #include <map>
+#include <shared_mutex>
 
 #include "songcore/shared/SongCore.hpp"
 #include "songcore/shared/SongLoader/CustomBeatmapLevel.hpp"
@@ -21,8 +24,9 @@ namespace BetterSongList {
             void OnSongsLoaded(std::span<SongCore::SongLoader::CustomBeatmapLevel* const> customLevels);
             void OnSongWillBeDeleted(SongCore::SongLoader::CustomBeatmapLevel* customLevel);
             void GatherFolderInfoThread(bool fullReload = false);
-            static std::map<std::string, int> songTimes;
-            static bool isLoading;
+            static std::map<std::string, std::time_t> songTimes;
+            static std::shared_mutex songTimesMutex;
+            static std::atomic_bool isLoading;
             static bool eventsMapped;
     };
 }

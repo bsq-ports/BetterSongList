@@ -61,6 +61,8 @@ namespace BetterSongList::SongDetails {
         /// @return song_data_core::BeatStarCharacteristic of the name, or Unknown for invalid
         SongDetailsCache::MapCharacteristic StringToBeatStarCharacteristics(std::string_view serializedName)
         {
+            if (serializedName.empty()) return SongDetailsCache::MapCharacteristic::Custom;
+
             switch(serializedName.data()[0])
             {
                 case 's': [[fallthrough]];
@@ -71,11 +73,11 @@ namespace BetterSongList::SongDetails {
                 case 'N': return SongDetailsCache::MapCharacteristic::NoArrows;
                 case 'd': [[fallthrough]];
                 case 'D':
-                    if (serializedName.data()[6] == '9') return SongDetailsCache::MapCharacteristic::NinetyDegree;
+                    if (serializedName.size() > 6 && serializedName[6] == '9') return SongDetailsCache::MapCharacteristic::NinetyDegree;
                     else return SongDetailsCache::MapCharacteristic::ThreeSixtyDegree;
                 case 'l': [[fallthrough]];
                 case 'L': {
-                    if (serializedName.data()[1] == 'a' || serializedName.data()[1] == 'A') return SongDetailsCache::MapCharacteristic::Lawless;
+                    if (serializedName.size() > 1 && (serializedName[1] == 'a' || serializedName[1] == 'A')) return SongDetailsCache::MapCharacteristic::Lawless;
                     else return SongDetailsCache::MapCharacteristic::LightShow;
                 }
                 default: return SongDetailsCache::MapCharacteristic::Custom;
