@@ -5,7 +5,6 @@
 #include "songcore/shared/CustomJSONData.hpp"
 
 #include "System/Threading/Tasks/Task_1.hpp"
-#include "GlobalNamespace/BeatmapDifficultySerializedMethods.hpp"
 #include "Utils/BeatmapUtils.hpp"
 
 #include "songcore/shared/SongLoader/CustomBeatmapLevel.hpp"
@@ -34,33 +33,18 @@ namespace BetterSongList {
             return invert;
         }
 
-        auto saveData = customLevel->get_standardLevelInfoSaveDataV2().value_or(nullptr);
-        if (!saveData) {
-            DEBUG("Level had no save data!");
+        auto customData = customLevel->get_CustomSaveDataInfo();
+        if (!customData) {
+            DEBUG("Level had no custom save data!");
             return invert;
         }
 
-        auto sets = saveData->____difficultyBeatmapSets;
+        auto levelDetails = customData->get().TryGetBasicLevelDetails();
+        if (!levelDetails) return invert;
 
-        for (auto set : sets) {
-            auto chara = set->____beatmapCharacteristicName;
-            auto diffs = set->____difficultyBeatmaps;
-            for (auto diff : diffs) {
-                auto customData = saveData->get_CustomSaveDataInfo();
-                if (!customData.has_value()) {
-                    continue;
-                }
-
-                GlobalNamespace::BeatmapDifficulty difficulty;
-                if (!GlobalNamespace::BeatmapDifficultySerializedMethods::BeatmapDifficultyFromSerializedName(diff->get_difficulty(), by_ref(difficulty))) {
-                    continue;
-                }
-
-                auto detailsOpt = customData.value().get().TryGetCharacteristicAndDifficulty(chara, difficulty);
-                if(detailsOpt) {
-                    auto details = detailsOpt.value();
-                    if (details.get().requirements.size() > 0) return !invert;
-                }
+        for (const auto& [characteristic, set] : levelDetails->get().characteristicNameToBeatmapDetailsSet) {
+            for (const auto& [difficulty, details] : set.difficultyToDifficultyBeatmapDetails) {
+                if (!details.requirements.empty()) return !invert;
             }
         }
         return invert;
