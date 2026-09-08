@@ -55,6 +55,12 @@ namespace BetterSongList {
     }
 
     bool FilterMethods::Register(ITransformerPlugin* filter) {
+        auto* registeredFilter = dynamic_cast<IFilter*>(filter);
+        if (!registeredFilter) {
+            ERROR("Cannot register a plugin that does not implement IFilter");
+            return false;
+        }
+
         auto name = filter->get_name();
         if (name.size() > 20) {
             name = name.substr(0, 20);
@@ -70,7 +76,7 @@ namespace BetterSongList {
             return false;
         }
 
-        methods.insert({ name, reinterpret_cast<IFilter*>(filter) });
+        methods.insert({ name, registeredFilter });
         return true;
     }
 
