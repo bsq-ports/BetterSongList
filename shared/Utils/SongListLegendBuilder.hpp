@@ -4,11 +4,22 @@
 #include "beatsaber-hook/shared/arrayw.hpp"
 #include "GlobalNamespace/BeatmapLevel.hpp"
 #include "ISorter.hpp"
+#include "paper2_scotland2/shared/utfcpp/source/utf8.h"
 #include <unordered_map>
 #include <algorithm>
 #include <string>
+#include <string_view>
 
 namespace BetterSongList::SongListLegendBuilder {
+    // Keep complete UTF-8 code points when shortening legend labels.
+    inline std::string GetLabelPrefix(std::string_view text, size_t length) {
+        auto end = text.begin();
+        for (size_t i = 0; i < length && end != text.end(); ++i) {
+            utf8::next(end, text.end());
+        }
+        return std::string(text.begin(), end);
+    }
+
     /// @brief just a way to add information to a vector. you shouldn't really use this yourself probably
     struct GroupedLegendPairs : std::vector<BetterSongList::ISorterWithLegend::LegendPair> {
         GroupedLegendPairs(const std::string& group) : std::vector<BetterSongList::ISorterWithLegend::LegendPair>(), group(group) {}
@@ -37,7 +48,9 @@ namespace BetterSongList::SongListLegendBuilder {
 
             // Grouping by key, toUpper;
             std::string KEY = str;
-            std::transform(KEY.begin(), KEY.end(), KEY.begin(), ::toupper);
+            std::transform(KEY.begin(), KEY.end(), KEY.begin(), [](unsigned char c) -> char {
+                return c >= 'a' && c <= 'z' ? c - 'a' + 'A' : c;
+            });
             auto itr = std::find(grouped.begin(), grouped.end(), KEY);
             if (itr == grouped.end()) {
                 grouped.emplace_back(KEY, ISorterWithLegend::LegendPair(str, i));
@@ -66,7 +79,7 @@ namespace BetterSongList::SongListLegendBuilder {
 
                 // if the legend text is too long, shorten it.
                 if (transformedResult.size() > entryLengthLimit)
-                    transformedResult = transformedResult.substr(0, entryLengthLimit);
+                    transformedResult = GetLabelPrefix(transformedResult, entryLengthLimit);
                 result.emplace_back(transformedResult, itr[0].second);
             }
         }

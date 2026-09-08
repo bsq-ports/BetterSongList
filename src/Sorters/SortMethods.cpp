@@ -5,6 +5,7 @@
 #include "Sorters/Models/BasicSongDetailsSorterWithLegend.hpp"
 #include "Sorters/Models/FolderDateSorter.hpp"
 #include "Sorters/Models/FunctionSorter.hpp"
+#include "Utils/SongListLegendBuilder.hpp"
 
 
 namespace BetterSongList {
@@ -39,7 +40,7 @@ namespace BetterSongList {
         },
         [](GlobalNamespace::BeatmapLevel* song) -> std::string {
             std::string songName = song->songName;
-            return songName.size() > 0 ? toLowercase(songName.substr(0, 1)) : "";
+            return SongListLegendBuilder::GetLabelPrefix(songName, 1);
         }
     );
 
@@ -77,7 +78,7 @@ namespace BetterSongList {
                 return "";
             }
 
-            return toLowercase(authorString.substr(0, 1));
+            return SongListLegendBuilder::GetLabelPrefix(authorString, 1);
         }
     );
 
@@ -96,7 +97,7 @@ namespace BetterSongList {
         },
         [](auto song) -> std::string {
             std::string levelAuthor{static_cast<std::string>(song->allMappers.size() > 0 ? song->allMappers[0] : "")};
-            return levelAuthor.size() > 0 ? toLowercase(levelAuthor.substr(0, 1)) : "";
+            return SongListLegendBuilder::GetLabelPrefix(levelAuthor, 1);
         }
     );
 
