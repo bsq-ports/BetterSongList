@@ -199,12 +199,20 @@ namespace BetterSongList::Hooks {
             doCancelSort = std::make_shared<std::atomic_bool>(false);
             DEBUG("PrepareStuffIfNecessary()");
             std::thread([cb, view = lastTableView, activeSorter = sorter, activeFilter = filter](std::weak_ptr<std::atomic_bool> thisDoCancelSort){
-                if (activeSorter && !activeSorter->get_isReady()) {
-                    activeSorter->Prepare().wait();
-                }
-
-                if (activeFilter && !activeFilter->get_isReady()) {
-                    activeFilter->Prepare().wait();
+                std::string preparationError;
+                bool preparingFilter = false;
+                try {
+                    if (activeSorter && !activeSorter->get_isReady()) {
+                        activeSorter->Prepare().get();
+                    }
+                    preparingFilter = true;
+                    if (activeFilter && !activeFilter->get_isReady()) {
+                        activeFilter->Prepare().get();
+                    }
+                } catch (const std::exception& error) {
+                    preparationError = fmt::format("Preparation failed: {}", error.what());
+                } catch (...) {
+                    preparationError = "Preparation failed";
                 }
 
                 DEBUG("ContinueWith");
@@ -215,10 +223,15 @@ namespace BetterSongList::Hooks {
                 }
 
                 if (!cancelSort->load(std::memory_order_acquire) && cb) {
-                    BSML::MainThreadScheduler::Schedule([cb, thisDoCancelSort, view] {
+                    BSML::MainThreadScheduler::Schedule([cb, thisDoCancelSort, view, preparationError, preparingFilter] {
                         auto cancelSort = thisDoCancelSort.lock();
                         if (!cancelSort || cancelSort->load(std::memory_order_acquire)) return;
                         if (!view || !lastTableView || view.ptr() != lastTableView.ptr() || !view->get_isActiveAndEnabled()) return;
+                        if (!preparationError.empty()) {
+                            FilterUI::get_instance()->ShowErrorASAP(preparationError);
+                            if (preparingFilter) FilterUI::SetFilter("", false, false);
+                            else FilterUI::SetSort("", false, false);
+                        }
                         cb();
                     });
                 }

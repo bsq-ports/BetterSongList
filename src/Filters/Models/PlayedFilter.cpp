@@ -1,8 +1,5 @@
 #include "Filters/Models/PlayedFilter.hpp"
 #include "Utils/LocalScoresUtils.hpp"
-#include "UnityEngine/Object.hpp"
-
-#include "bsml/shared/BSML/MainThreadScheduler.hpp"
 
 namespace BetterSongList {
     PlayedFilter::PlayedFilter(bool unplayed) 
@@ -15,10 +12,9 @@ namespace BetterSongList {
     }
 
     std::future<void> PlayedFilter::Prepare() {
-            BSML::MainThreadScheduler::Schedule(LocalScoresUtils::Load);
-            return std::async(std::launch::deferred, [this](){
-                while (!this->get_isReady()) std::this_thread::yield();
-            });
+        return std::async(std::launch::deferred, [load = LocalScoresUtils::Load()] {
+            load.get();
+        });
     }
 
     bool PlayedFilter::GetValueFor(GlobalNamespace::BeatmapLevel* level) { 

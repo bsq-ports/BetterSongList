@@ -11,10 +11,12 @@
 #include "System/Collections/Generic/Dictionary_2.hpp"
 #include "hooking.hpp"
 #include "logging.hpp"
+#include "bsml/shared/BSML/MainThreadScheduler.hpp"
 
 #include "custom-types/shared/coroutine.hpp"
 #include <atomic>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
 
@@ -27,8 +29,8 @@ namespace BetterSongList::LocalScoresUtils {
     std::shared_mutex mutex_playedMaps;
     // Check if scores have been loaded into the map 
     std::atomic<bool> loadedScores = false;
-    // Is loading scores right now
-    static std::atomic<bool> isLoadingScores = false;
+    static std::mutex loadMutex;
+    static std::shared_future<void> loadFuture;
 
     /**
      * @brief Get the playerDataModel object and cache it
@@ -61,43 +63,55 @@ namespace BetterSongList::LocalScoresUtils {
     }
 
 
-    void Load() {
-        // If aleady loading or don't have scores, skip
-        // get_playerDataModel() will set playerDataModel if not set, it i
-        if (isLoadingScores || !get_playerDataModel()) return;
-        isLoadingScores = true;
-        
-        il2cpp_thread([](){
-            try {
-                auto playerData = playerDataModel ? playerDataModel->_playerData : nullptr;
-                if (!playerData) {
-                    WARNING("LocalScoresUtils::Load() => No player data found, cannot load local scores");
-                    isLoadingScores = false;
-                    return;
-                }
+    std::shared_future<void> Load() {
+        std::lock_guard lock(loadMutex);
+        // Share an in-flight attempt, but allow retrying a completed failure.
+        if (loadFuture.valid() && (loadedScores || loadFuture.wait_for(std::chrono::seconds(0)) != std::future_status::ready)) {
+            return loadFuture;
+        }
+        auto completion = std::make_shared<std::promise<void>>();
+        loadFuture = completion->get_future().share();
 
-                // Get all level stats data
-                auto levelData = ListW<GlobalNamespace::PlayerLevelStatsData*>::New();
-                auto stats = playerData ? playerData->get_levelsStatsData()->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_() : nullptr;
-                levelData->AddRange(stats);
+        try {
+            BSML::MainThreadScheduler::Schedule([completion] {
+                try {
+                    auto* model = get_playerDataModel();
+                    auto* playerData = model ? model->_playerData : nullptr;
+                    if (!playerData) throw std::runtime_error("Player data is not available");
+
+                    il2cpp_thread([completion, playerData = safe_ptr<GlobalNamespace::PlayerData*>(playerData)] {
+                        try {
+                            // Get all level stats data
+                            auto levelData = ListW<GlobalNamespace::PlayerLevelStatsData*>::New();
+                            auto* levelStats = playerData->get_levelsStatsData();
+                            if (!levelStats) throw std::runtime_error("Local score data is not available");
+                            auto stats = levelStats->get_Values()->i___System__Collections__Generic__IEnumerable_1_TValue_();
+                            levelData->AddRange(stats);
                 
-                // Populate playedMaps
-                std::unique_lock<std::shared_mutex> lock(BetterSongList::LocalScoresUtils::mutex_playedMaps);
-                playedMaps.reserve(500);
-                for (auto x : levelData) {
-                    if (!x->_validScore) continue;
-                    auto levelId = static_cast<std::string>(x->_levelID);
-                    playedMaps.insert(levelId);
-                }
+                            // Populate playedMaps
+                            std::unique_lock<std::shared_mutex> lock(BetterSongList::LocalScoresUtils::mutex_playedMaps);
+                            playedMaps.reserve(500);
+                            for (auto x : levelData) {
+                                if (!x->_validScore) continue;
+                                auto levelId = static_cast<std::string>(x->_levelID);
+                                playedMaps.insert(levelId);
+                            }
 
-                isLoadingScores = false;
-                loadedScores = true;
-            } catch (...) {
-                ERROR("LocalScoresUtils::Load() => Exception during loading local scores");
-                isLoadingScores = false;
-                return;
-            }
-        }).detach();
+                            loadedScores = true;
+                            completion->set_value();
+                        } catch (...) {
+                            ERROR("LocalScoresUtils::Load() => Exception during loading local scores");
+                            completion->set_exception(std::current_exception());
+                        }
+                    }).detach();
+                } catch (...) {
+                    completion->set_exception(std::current_exception());
+                }
+            });
+        } catch (...) {
+            completion->set_exception(std::current_exception());
+        }
+        return loadFuture;
     }
 }
 
