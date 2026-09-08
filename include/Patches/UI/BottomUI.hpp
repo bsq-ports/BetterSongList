@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GlobalNamespace/LevelCollectionNavigationController.hpp"
+#include "UnityEngine/Transform.hpp"
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "custom-types/shared/coroutine.hpp"
 
 namespace BetterSongList::Hooks {
@@ -10,7 +12,7 @@ namespace BetterSongList::Hooks {
             static void LevelCollectionNavigationController_DidActivate_Prefix(GlobalNamespace::LevelCollectionNavigationController* self, bool firstActivation);
         
         private:
-            static custom_types::Helpers::Coroutine FixPos(UnityEngine::Transform* t);
-            static custom_types::Helpers::Coroutine InitDelayed(UnityEngine::Transform* t);
+            static custom_types::Helpers::Coroutine FixPos(safe_ptr<UnityEngine::Transform*> t);
+            static custom_types::Helpers::Coroutine InitDelayed(safe_ptr<UnityEngine::Transform*> t);
     };
 }
