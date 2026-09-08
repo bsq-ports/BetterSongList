@@ -5,6 +5,7 @@
 #include "songcore/shared/CustomJSONData.hpp"
 
 #include "System/Threading/Tasks/Task_1.hpp"
+#include "GlobalNamespace/BeatmapDifficultySerializedMethods.hpp"
 #include "Utils/BeatmapUtils.hpp"
 
 #include "songcore/shared/SongLoader/CustomBeatmapLevel.hpp"
@@ -50,7 +51,12 @@ namespace BetterSongList {
                     continue;
                 }
 
-                auto detailsOpt = customData.value().get().TryGetCharacteristicAndDifficulty(chara, diff->____difficultyRank);
+                GlobalNamespace::BeatmapDifficulty difficulty;
+                if (!GlobalNamespace::BeatmapDifficultySerializedMethods::BeatmapDifficultyFromSerializedName(diff->get_difficulty(), by_ref(difficulty))) {
+                    continue;
+                }
+
+                auto detailsOpt = customData.value().get().TryGetCharacteristicAndDifficulty(chara, difficulty);
                 if(detailsOpt) {
                     auto details = detailsOpt.value();
                     if (details.get().requirements.size() > 0) return !invert;
