@@ -14,7 +14,7 @@ namespace BetterSongList::API {
     concept Filter = std::is_convertible_v<T, IFilter*>;
 
     template<typename T>
-    concept Sorter = std::is_convertible_v<T, ISorter*>;
+    concept Sorter = std::is_convertible_v<T, ISorterPrimitive*> || std::is_convertible_v<T, ISorterCustom*>;
     
     /// @brief Register your primitive sorter for use with BSL
     /// @tparam the type of your sorter

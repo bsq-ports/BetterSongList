@@ -142,23 +142,12 @@ namespace BetterSongList::Hooks {
         INFO("We're down to {}", previewBeatmapLevels.size());
         if (sorter && sorter->get_isReady()) {
             INFO("Sorting levels!");
-            // you say RED WTF IS GOING ON HERE
-            union {
-                ISorter* sorter;
-                ISorterCustom* customSorter;
-                ISorterPrimitive* primitiveSorter;
-            } castedSorter;
-            // this union just holds different types, but really it's 1 pointer, which is assigned here
-            castedSorter.sorter = sorter;
-
-            // this checks if the server is an ISorterCustom with rtti
-            if (sorter && sorter->as<ISorterCustom*>()) {
-                castedSorter.customSorter->DoSort(previewBeatmapLevels, config.get_sortAsc());
+            if (auto* customSorter = sorter->as<ISorterCustom*>()) {
+                customSorter->DoSort(previewBeatmapLevels, config.get_sortAsc());
             }
-            // this checks if the server is an ISorterPrimitive with rtti
-            else if (sorter && sorter->as<ISorterPrimitive*>()) {
+            else if (auto* primitiveSorter = sorter->as<ISorterPrimitive*>()) {
                 // sorting is the same regardless of ascending or descending, since the way we differentiate between ascending and descending is to just use the reverse iterators if ascending
-                auto sort = [primitiveSorter = castedSorter.primitiveSorter]
+                auto sort = [primitiveSorter]
                 (GlobalNamespace::BeatmapLevel* lhs, GlobalNamespace::BeatmapLevel* rhs) -> bool {
                     return primitiveSorter->GetValueFor(lhs) < primitiveSorter->GetValueFor(rhs);
                 };
@@ -167,15 +156,13 @@ namespace BetterSongList::Hooks {
                 else std::sort(previewBeatmapLevels.begin(), previewBeatmapLevels.end(), sort);
             }
             // if it was neither, print the type name
-            else if (sorter) {
+            else {
                 ISorter& s = *sorter;
                 auto& ti = typeid(s);
                 int status;
                 auto realname = abi::__cxa_demangle(ti.name(), 0, 0, &status);
                 ERROR("Sorter was of type {} which is not a valid sorter type!", realname);
                 free(realname);
-            } else {
-                DEBUG("Sorter was null!");
             }
         }
 
