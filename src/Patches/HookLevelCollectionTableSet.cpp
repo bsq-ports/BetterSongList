@@ -42,6 +42,8 @@ namespace BetterSongList::Hooks {
         return copy;
     }
 
+    static safe_ptr<GlobalNamespace::LevelCollectionTableView*> lastTableView;
+
     ISorter* HookLevelCollectionTableSet::sorter;
     IFilter* HookLevelCollectionTableSet::filter;
     std::function<void(ArrayW<GlobalNamespace::BeatmapLevel*>)> HookLevelCollectionTableSet::recallLast;
@@ -73,7 +75,7 @@ namespace BetterSongList::Hooks {
      * @param clearAsyncResult 
      */
     void HookLevelCollectionTableSet::Refresh(bool processAsync, bool clearAsyncResult) {
-        if (!get_lastInMapList()) {
+        if (!lastTableView || !lastTableView->get_isActiveAndEnabled() || !get_lastInMapList()) {
             return;
         }
 
@@ -104,9 +106,11 @@ namespace BetterSongList::Hooks {
         * Forcing a refresh of the table by skipping the optimization check in the SetData():Prefix
         * because Refresh() is only called in situations where the result will probably change
         */
-        auto ml = get_lastInMapList();
+        auto ml = lastInMapList;
         lastInMapList.emplace(nullptr);
-        if (recallLast) recallLast(ml);
+        // SetData replaces recallLast; keep this invocation and its captures alive.
+        auto recall = recallLast;
+        if (recall) recall(ml.ptr());
     }
 
     void HookLevelCollectionTableSet::FilterWrapper(ArrayW<GlobalNamespace::BeatmapLevel*>& previewBeatmapLevels) {
@@ -192,6 +196,12 @@ namespace BetterSongList::Hooks {
     bool HookLevelCollectionTableSet::PrepareStuffIfNecessary(std::function<void()> cb, bool cbOnAlreadyPrepared) {
         INFO("PrepareStuffIfNecessary({}, {})", cb != nullptr, cbOnAlreadyPrepared);
 
+        // A ready request also supersedes any preparation that was queued earlier.
+        if (doCancelSort) {
+            doCancelSort->store(true, std::memory_order_release);
+            doCancelSort.reset();
+        }
+
         if ((filter && !filter->get_isReady()) || (sorter && !sorter->get_isReady())) {
             auto instance = FilterUI::get_instance();
             auto indicator = instance->filterLoadingIndicator;
@@ -199,20 +209,15 @@ namespace BetterSongList::Hooks {
                 indicator->get_gameObject()->SetActive(true);
             }
 
-            if (doCancelSort) {
-                doCancelSort->store(true, std::memory_order_release);
-                doCancelSort.reset();
-            }
-
             doCancelSort = std::make_shared<std::atomic_bool>(false);
             DEBUG("PrepareStuffIfNecessary()");
-            std::thread([cb](std::weak_ptr<std::atomic_bool> thisDoCancelSort){
-                if (sorter && !sorter->get_isReady()) { 
-                    sorter->Prepare().wait();
+            std::thread([cb, view = lastTableView, activeSorter = sorter, activeFilter = filter](std::weak_ptr<std::atomic_bool> thisDoCancelSort){
+                if (activeSorter && !activeSorter->get_isReady()) {
+                    activeSorter->Prepare().wait();
                 }
 
-                if (filter && !filter->get_isReady()) { 
-                    filter->Prepare().wait();
+                if (activeFilter && !activeFilter->get_isReady()) {
+                    activeFilter->Prepare().wait();
                 }
 
                 DEBUG("ContinueWith");
@@ -223,8 +228,12 @@ namespace BetterSongList::Hooks {
                 }
 
                 if (!cancelSort->load(std::memory_order_acquire) && cb) {
-                    // main thread because cb possibly does main thread things
-                    BSML::MainThreadScheduler::Schedule(cb);
+                    BSML::MainThreadScheduler::Schedule([cb, thisDoCancelSort, view] {
+                        auto cancelSort = thisDoCancelSort.lock();
+                        if (!cancelSort || cancelSort->load(std::memory_order_acquire)) return;
+                        if (!view || !lastTableView || view.ptr() != lastTableView.ptr() || !view->get_isActiveAndEnabled()) return;
+                        cb();
+                    });
                 }
             }, doCancelSort).detach();
 
@@ -241,11 +250,13 @@ namespace BetterSongList::Hooks {
         DEBUG("LevelCollectionTableView.SetData() : Prefix");
 
         // If SetData is called with the literal same maplist as before we might as well ignore it
-        if (get_lastInMapList() && previewBeatmapLevels.convert() == get_lastInMapList().convert() && get_lastOutMapList()) {
+        if (lastTableView && lastTableView.ptr() == self && get_lastInMapList() && previewBeatmapLevels.convert() == get_lastInMapList().convert() && get_lastOutMapList()) {
             DEBUG("LevelCollectionTableView.SetData() : Prefix -> levels = lastout because {} == {}", previewBeatmapLevels.convert(), get_lastInMapList().convert());
             previewBeatmapLevels = get_lastOutMapList();
             return;
         }
+
+        lastTableView.emplace(self);
 
         // Playlistlib has its own custom wrapping class for Playlists so it can properly track duplicates, so we need to use its collection
         if (HookSelectedCollection::get_lastSelectedCollection() && PlaylistUtils::get_hasPlaylistLib()) {
@@ -260,14 +271,15 @@ namespace BetterSongList::Hooks {
 
         // This is a callback to call the sort again with the same parameters
         auto isSorted = beatmapLevelsAreSorted;
-        recallLast = [self, favoriteLevelIds, isSorted](ArrayW<GlobalNamespace::BeatmapLevel *> overrideData){
+        recallLast = [view = safe_ptr<GlobalNamespace::LevelCollectionTableView*>(self), favorites = safe_ptr<HashSet<StringW>*>(favoriteLevelIds), isSorted](ArrayW<GlobalNamespace::BeatmapLevel *> overrideData){
+            if (!view || !view->get_isActiveAndEnabled()) return;
             tryReselectLastSelectedLevel = true;
             auto data = overrideData ? overrideData : get_lastInMapList();
             INFO("recallLast, Data: {}", data.convert());
             if (data) {
                 INFO("Setting data with {} levels", data.size());
             }
-            self->SetData((System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::BeatmapLevel*>*)data.convert(), favoriteLevelIds, isSorted, !isSorted);
+            view->SetData((System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::BeatmapLevel*>*)data.convert(), favorites.ptr(), isSorted, !isSorted);
         };
 
         // If this is true the default Alphabet scrollbar is processed / shown - We dont want that when we use a custom filter
@@ -296,10 +308,12 @@ namespace BetterSongList::Hooks {
         FilterWrapper(previewBeatmapLevels);
     }
 
-    static custom_types::Helpers::Coroutine TryReselectLastSelectedSong(GlobalNamespace::LevelCollectionTableView* __instance) {
+    static custom_types::Helpers::Coroutine TryReselectLastSelectedSong(safe_ptr<GlobalNamespace::LevelCollectionTableView*> view) {
         // Skip a frame
         co_yield nullptr;
 
+        if (!view || !lastTableView || view.ptr() != lastTableView.ptr() || !view->get_isActiveAndEnabled()) co_return;
+        auto* __instance = view.ptr();
         auto lastOutMapList = HookLevelCollectionTableSet::get_lastOutMapList();
         int lastOutSize = lastOutMapList ? lastOutMapList.size() : 0;
         if(
