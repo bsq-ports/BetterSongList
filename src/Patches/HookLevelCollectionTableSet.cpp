@@ -305,6 +305,8 @@ namespace BetterSongList::Hooks {
             return;
         }
 
+        // Keep sorting from changing the array owned by the selected pack or caller.
+        previewBeatmapLevels = CloneLevels(previewBeatmapLevels);
         FilterWrapper(previewBeatmapLevels);
     }
 
