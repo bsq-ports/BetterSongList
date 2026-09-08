@@ -150,6 +150,8 @@ namespace BetterSongList::Hooks {
                         obstaclesText->set_fontStyle(TMPro::FontStyles::Normal);
                         obstaclesText->set_text(fmt::format("<i>{}</i> <b><size=3.3><color=#FF0>⚠</color></size></b>", std::abs(obstacleCount)));
                     }
+                } else if (obstacleCount < 0) {
+                    obstaclesText->set_text(fmt::format("{}", std::abs(obstacleCount)));
                 }
             };
 

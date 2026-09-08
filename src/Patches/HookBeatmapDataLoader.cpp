@@ -1,13 +1,15 @@
 #include "Patches/HookBeatmapDataLoader.hpp"
 
 #include "UI/FilterUI.hpp"
+#include <limits>
 
 namespace BetterSongList::Hooks {
     bool HookBeatmapDataLoader::GetMarkStatus(std::vector<SimpleObstacle> obstacles) {
         if(obstacles.size() == 0)
             return false;
 
-        float wallExistence[2] = {0, 0};
+        constexpr float noWall = -std::numeric_limits<float>::infinity();
+        float wallExistence[2] = {noWall, noWall};
 
         for(auto& o : obstacles) {
             // Ignore 1 wide walls on left
