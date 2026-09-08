@@ -51,7 +51,7 @@ MAKE_AUTO_HOOK_MATCH(BeatmapDataLoaderVersion4_BeatmapDataLoader_GetBeatmapDataB
     for (int i = 0; i < count3; i++)
     {
         auto beat = beatmapSaveData->___obstacles[i];
-        auto obstacleData = beatmapSaveData->___obstaclesData[i];
+        auto obstacleData = beatmapSaveData->___obstaclesData[beat->i];
         obstacles.push_back(BetterSongList::Hooks::SimpleObstacle(obstacleData.x, obstacleData.y, obstacleData.w, obstacleData.h, obstacleData.d, beat->b));
     }
 
