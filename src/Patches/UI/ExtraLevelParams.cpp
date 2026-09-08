@@ -174,6 +174,7 @@ namespace BetterSongList::Hooks {
 
         if (get_fields()) {
             auto fieldsW = get_fields();
+            fieldsW[3]->set_text("N/A");
             if (!BetterSongList::SongDetails::get_isAvailable()) {
                 INFO("No song details available");
                 fieldsW[0]->set_text("N/A");
@@ -187,6 +188,7 @@ namespace BetterSongList::Hooks {
                     INFO("Characteristic was not standard");
                     fieldsW[0]->set_text("-");
                     fieldsW[1]->set_text("-");
+                    fieldsW[3]->set_text("-");
                 } else {
                     INFO("Characteristic was standard");
                     auto hash = BeatmapUtils::GetHashOfPreview(level);
@@ -249,6 +251,7 @@ namespace BetterSongList::Hooks {
                 INFO("details available, but empty and not yet fetched");
                 fieldsW[0]->set_text("...");
                 fieldsW[1]->set_text("...");
+                fieldsW[3]->set_text("...");
             }
 
             auto customBeatmapLevelOpt = i2c::try_cast<SongCore::SongLoader::CustomBeatmapLevel*>(level);

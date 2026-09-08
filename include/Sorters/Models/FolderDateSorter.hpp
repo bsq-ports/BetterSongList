@@ -26,6 +26,7 @@ namespace BetterSongList {
             void GatherFolderInfoThread(bool fullReload = false);
             static std::map<std::string, std::time_t> songTimes;
             static std::shared_mutex songTimesMutex;
+            static bool hasScanned;
             static std::atomic_bool isLoading;
             static bool eventsMapped;
     };

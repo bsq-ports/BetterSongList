@@ -21,6 +21,7 @@ namespace BetterSongList {
     std::map<std::string, std::time_t> FolderDateSorter::songTimes;
 
     std::shared_mutex FolderDateSorter::songTimesMutex;
+    bool FolderDateSorter::hasScanned = false;
 
     std::atomic_bool FolderDateSorter::isLoading = false;
     bool FolderDateSorter::eventsMapped = false;
@@ -36,7 +37,7 @@ namespace BetterSongList {
 
     bool FolderDateSorter::get_isReady() const {
         std::shared_lock<std::shared_mutex> lock(songTimesMutex);
-        return !songTimes.empty();
+        return hasScanned;
     }
 
     std::future<void> FolderDateSorter::Prepare() {
@@ -90,6 +91,7 @@ namespace BetterSongList {
             for (const auto& [levelId, timestamp] : gatheredSongTimes) {
                 songTimes[levelId] = timestamp;
             }
+            hasScanned = true;
         }
 
     }
