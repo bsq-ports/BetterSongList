@@ -2,6 +2,8 @@
 #include "GlobalNamespace/BeatmapCharacteristicExtensions.hpp"
 #include "logging.hpp"
 #include "songcore/shared/SongCore.hpp"
+#include "bsml/shared/BSML/MainThreadScheduler.hpp"
+#include "Patches/UI/ExtraLevelParams.hpp"
 
 #include <atomic>
 #include <mutex>
@@ -69,6 +71,11 @@ namespace BetterSongList::SongDetails {
                 DEBUG("BSL Not failed Songs size:{}", details->songs.size());
             }
             finishedInitAttempt.store(true, std::memory_order_release);
+            if (CheckAvailable()) {
+                BSML::MainThreadScheduler::Schedule([] {
+                    Hooks::ExtraLevelParams::UpdateState();
+                });
+            }
         }).detach();
     }
 

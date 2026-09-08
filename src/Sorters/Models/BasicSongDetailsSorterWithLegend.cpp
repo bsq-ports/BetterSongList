@@ -5,6 +5,8 @@
 #include "Utils/BeatmapUtils.hpp"
 #include "Utils/SongListLegendBuilder.hpp"
 
+#include <stdexcept>
+
 namespace BetterSongList {
     BasicSongDetailsSorterWithLegend::BasicSongDetailsSorterWithLegend(
         BasicSongDetailsSorterWithLegend::ValueGetterFunc sortFunc
@@ -28,7 +30,7 @@ namespace BetterSongList {
     }
 
     bool BasicSongDetailsSorterWithLegend::get_isReady() const {
-        return SongDetails::get_finishedInitAttempt();
+        return SongDetails::get_finishedInitAttempt() && SongDetails::GetUnavailabilityReason().empty();
     }
 
     std::future<void> BasicSongDetailsSorterWithLegend::Prepare() {
@@ -37,6 +39,9 @@ namespace BetterSongList {
 
             while(!SongDetails::get_finishedInitAttempt()) {
                 std::this_thread::yield();
+            }
+            if (auto reason = SongDetails::GetUnavailabilityReason(); !reason.empty()) {
+                throw std::runtime_error(reason);
             }
         });
     }

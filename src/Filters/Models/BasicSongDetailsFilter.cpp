@@ -5,6 +5,8 @@
 #include "song-details/shared/SongArray.hpp"
 #include "song-details/shared/SongDetails.hpp"
 
+#include <stdexcept>
+
 namespace BetterSongList {
     BasicSongDetailsFilter::BasicSongDetailsFilter(const std::function<bool(const SongDetailsCache::Song*)>& func) 
         : IFilter(), IAvailabilityCheck(), filterValueTransformer(func) {
@@ -12,7 +14,7 @@ namespace BetterSongList {
     }
 
     bool BasicSongDetailsFilter::get_isReady() const { 
-        return SongDetails::get_finishedInitAttempt(); 
+        return SongDetails::get_finishedInitAttempt() && SongDetails::GetUnavailabilityReason().empty();
     }
 
     std::future<void> BasicSongDetailsFilter::Prepare() {
@@ -21,6 +23,9 @@ namespace BetterSongList {
 
             while(!SongDetails::get_finishedInitAttempt()) {
                 std::this_thread::yield();
+            }
+            if (auto reason = SongDetails::GetUnavailabilityReason(); !reason.empty()) {
+                throw std::runtime_error(reason);
             }
         });
     }
