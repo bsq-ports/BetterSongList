@@ -33,7 +33,7 @@ namespace BetterSongList::SongDetails {
     }
 
     std::string GetUnavailabilityReason() {
-        if (finishedInitAttempt && !songDetails->songs.get_isDataAvailable() || songDetails->songs.size() == 0) {
+        if (finishedInitAttempt && (!songDetails || !songDetails->songs.get_isDataAvailable() || songDetails->songs.size() == 0)) {
             return "Initialization failed";
         }
         return "";
