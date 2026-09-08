@@ -22,8 +22,7 @@ namespace BetterSongList {
 
     std::future<void> RequirementsFilter::Prepare() {
         return std::async(std::launch::async, [this](){
-            auto hasLoaded = SongCore::API::Loading::AreSongsLoaded();
-            while (!hasLoaded) std::this_thread::yield();
+            while (!SongCore::API::Loading::AreSongsLoaded()) std::this_thread::yield();
         });
     }
 
