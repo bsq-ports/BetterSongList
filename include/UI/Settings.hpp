@@ -25,14 +25,18 @@ DECLARE_CLASS_CODEGEN(BetterSongList, Settings, Il2CppObject) {
 
     BSML_PROPERTY_DEFINITION(bool, allowWipDelete);
     BSML_PROPERTY_DEFINITION(bool, autoFilterUnowned);
-    BSML_PROPERTY_DEFINITION(bool, showWarningIfMapHasCrouchWallsBecauseMappersThinkSprinklingThemInRandomlyIsFun);
+    DECLARE_INSTANCE_METHOD(bool, get_showWarningIfMapHasCrouchWallsBecauseMappersThinkSprinklingThemInRandomlyIsFun);
+    DECLARE_INSTANCE_METHOD(void, set_showWarningIfMapHasCrouchWallsBecauseMappersThinkSprinklingThemInRandomlyIsFun, bool value);
     BSML_PROPERTY_DEFINITION(bool, clearFiltersOnPlaylistSelect);
     BSML_PROPERTY_DEFINITION(bool, modBasegameSearch);
-    BSML_PROPERTY_DEFINITION(bool, extendSongScrollbar);
+    DECLARE_INSTANCE_METHOD(bool, get_extendSongScrollbar);
+    DECLARE_INSTANCE_METHOD(void, set_extendSongScrollbar, bool value);
     BSML_PROPERTY_DEFINITION(bool, showMapJDInsteadOfOffset);
-    BSML_PROPERTY_DEFINITION(float, accuracyMultiplier);
+    DECLARE_INSTANCE_METHOD(float, get_accuracyMultiplier);
+    DECLARE_INSTANCE_METHOD(void, set_accuracyMultiplier, float value);
     BSML_OPTIONS_LIST_OBJECT(preferredLeaderboardChoices, "ScoreSaber", "BeatLeader");
-    BSML_PROPERTY_DEFINITION(StringW, preferredLeaderboard);
+    DECLARE_INSTANCE_METHOD(StringW, get_preferredLeaderboard);
+    DECLARE_INSTANCE_METHOD(void, set_preferredLeaderboard, StringW value);
 
     DECLARE_DEFAULT_CTOR();
     public:

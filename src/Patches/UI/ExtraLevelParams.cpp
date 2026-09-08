@@ -236,7 +236,7 @@ namespace BetterSongList::Hooks {
                             auto acc = 0.984f - (std::max(0.0f, (diff->starsSS - 1.5f) / (12.5f - 1.5f) / config.get_accuracyMultiplier()) * .027f);
                             auto pp = PPUtils::PPPercentage(acc) * diff->starsSS * 42.1f;
 
-                            fieldsW[0]->set_text(fmt::format("{0} <size=2.5>({1:0.0f})</size>", (int)pp, acc));
+                            fieldsW[0]->set_text(fmt::format("{0} <size=2.5>({1:.1f}%)</size>", (int)pp, acc * 100.0f));
                             fieldsW[1]->set_text(fmt::format("{:1.1f}", diff->starsSS));
 
                         } else {

@@ -23,7 +23,8 @@ namespace BetterSongList {
     std::shared_mutex FolderDateSorter::songTimesMutex;
     bool FolderDateSorter::hasScanned = false;
 
-    std::atomic_bool FolderDateSorter::isLoading = false;
+    std::mutex FolderDateSorter::preparationMutex;
+    std::shared_future<void> FolderDateSorter::preparation;
     bool FolderDateSorter::eventsMapped = false;
 
     FolderDateSorter::FolderDateSorter() : ISorterWithLegend(), ISorterPrimitive() { }
@@ -97,27 +98,21 @@ namespace BetterSongList {
     }
 
     std::future<void> FolderDateSorter::Prepare(bool fullReload) {
-        bool expected = false;
-        if (!isLoading.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
-            return std::async(std::launch::deferred, []{});
+        std::lock_guard lock(preparationMutex);
+        if (!preparation.valid() || preparation.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+            preparation = il2cpp_async(std::launch::async, [fullReload, this] {
+                if (!eventsMapped) {
+                    SongCore::API::Loading::GetSongsLoadedEvent() += {&FolderDateSorter::OnSongsLoaded, this};
+                    SongCore::API::Loading::GetSongWillBeDeletedEvent() += {&FolderDateSorter::OnSongWillBeDeleted, this};
+                    eventsMapped = true;
+                }
+
+                while (!SongCore::API::Loading::AreSongsLoaded()) std::this_thread::yield();
+                GatherFolderInfoThread(fullReload);
+            }).share();
         }
-
-        return il2cpp_async(std::launch::async, [fullReload, this](){
-            i2c::on_scope_exit resetLoading([] {
-                isLoading.store(false, std::memory_order_release);
-            });
-
-            if (this->eventsMapped == false) {
-                SongCore::API::Loading::GetSongsLoadedEvent() += {&FolderDateSorter::OnSongsLoaded, this};
-                SongCore::API::Loading::GetSongWillBeDeletedEvent() += {&FolderDateSorter::OnSongWillBeDeleted, this};
-
-                this->eventsMapped = true;
-            }
-
-            while (!SongCore::API::Loading::AreSongsLoaded()) std::this_thread::yield();
-            
-            this->FolderDateSorter::GatherFolderInfoThread(fullReload);
-        });
+        // Every caller waits for the same scan and receives its errors.
+        return std::async(std::launch::deferred, [pending = preparation] { pending.get(); });
     }
 
     std::optional<float> FolderDateSorter::GetValueFor(GlobalNamespace::BeatmapLevel* level) const {

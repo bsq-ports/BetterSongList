@@ -189,13 +189,13 @@ namespace BetterSongList::Hooks {
             doCancelSort.reset();
         }
 
-        if ((filter && !filter->get_isReady()) || (sorter && !sorter->get_isReady())) {
-            auto instance = FilterUI::get_instance();
-            auto indicator = instance->filterLoadingIndicator;
-            if (indicator && indicator->___m_CachedPtr.m_value) {
-                indicator->get_gameObject()->SetActive(true);
-            }
+        const bool needsPreparation = (filter && !filter->get_isReady()) || (sorter && !sorter->get_isReady());
+        auto indicator = FilterUI::get_instance()->filterLoadingIndicator;
+        if (indicator && indicator->___m_CachedPtr.m_value) {
+            indicator->get_gameObject()->SetActive(needsPreparation);
+        }
 
+        if (needsPreparation) {
             doCancelSort = std::make_shared<std::atomic_bool>(false);
             DEBUG("PrepareStuffIfNecessary()");
             std::thread([cb, view = lastTableView, activeSorter = sorter, activeFilter = filter](std::weak_ptr<std::atomic_bool> thisDoCancelSort){
@@ -227,6 +227,8 @@ namespace BetterSongList::Hooks {
                         auto cancelSort = thisDoCancelSort.lock();
                         if (!cancelSort || cancelSort->load(std::memory_order_acquire)) return;
                         if (!view || !lastTableView || view.ptr() != lastTableView.ptr() || !view->get_isActiveAndEnabled()) return;
+                        auto indicator = FilterUI::get_instance()->filterLoadingIndicator;
+                        if (indicator && indicator->___m_CachedPtr.m_value) indicator->get_gameObject()->SetActive(false);
                         if (!preparationError.empty()) {
                             FilterUI::get_instance()->ShowErrorASAP(preparationError);
                             if (preparingFilter) FilterUI::SetFilter("", false, false);
@@ -290,12 +292,6 @@ namespace BetterSongList::Hooks {
 
         if (PrepareStuffIfNecessary([](){Refresh(true);})) {
             DEBUG("Stuff isnt ready yet... Preparing it and then reloading list: Sorter {0}, Filter {1}", !sorter || sorter->get_isReady(), !filter || filter->get_isReady());
-        }
-
-        auto instance = FilterUI::get_instance();
-        auto loadingIndicator = instance->filterLoadingIndicator;
-        if (loadingIndicator && loadingIndicator->___m_CachedPtr.m_value) {
-            loadingIndicator->get_gameObject()->SetActive(false);
         }
 
         if (asyncPreProcessed && asyncPreProcessed.ptr()) {

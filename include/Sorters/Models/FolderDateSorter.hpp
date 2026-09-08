@@ -2,7 +2,7 @@
 
 #include "ISorter.hpp"
 #include "GlobalNamespace/BeatmapLevel.hpp"
-#include <atomic>
+#include <mutex>
 #include <ctime>
 #include <map>
 #include <shared_mutex>
@@ -27,7 +27,8 @@ namespace BetterSongList {
             static std::map<std::string, std::time_t> songTimes;
             static std::shared_mutex songTimesMutex;
             static bool hasScanned;
-            static std::atomic_bool isLoading;
+            static std::mutex preparationMutex;
+            static std::shared_future<void> preparation;
             static bool eventsMapped;
     };
 }
