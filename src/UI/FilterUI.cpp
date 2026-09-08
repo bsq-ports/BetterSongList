@@ -28,6 +28,8 @@
 #include <algorithm>
 
 #include "bsml/shared/Helpers/utilities.hpp"
+#include "bsml/shared/Helpers/delegates.hpp"
+#include "HMUI/ViewController.hpp"
 
 DEFINE_TYPE(BetterSongList, FilterUI);
 
@@ -109,6 +111,13 @@ namespace BetterSongList {
     }
 
     void FilterUI::PostParse() {
+        ++warningGeneration;
+        warningLoadInProgress = false;
+        // Handle outside clicks ourselves so BSML cannot hide the next queued dialog.
+        incompatibilityModal->dismissOnBlockerClicked = false;
+        incompatibilityModal->onHide = [owner = safe_ptr<FilterUI*, false>(this), modal = incompatibilityModal] {
+            if (owner->incompatibilityModal == modal) owner->CloseWarningModal();
+        };
 		UpdateVisibleTransformers();
 
 		for(const auto& [key, value] : sortOptions) {
@@ -126,6 +135,7 @@ namespace BetterSongList {
 
 		UpdateDropdowns();
 		SetSortDirection(config.get_sortAsc(), false);
+        PossiblyShowNextWarning();
     }
 
     static bool CheckIsVisible(ITransformerPlugin* plugin) {
@@ -324,38 +334,53 @@ namespace BetterSongList {
 
     void FilterUI::ShowErrorASAP(std::string_view text) {
         if (!text.empty()) warnings.push(static_cast<std::string>(text));
-        if (!warningLoadInProgress)
-            BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(_ShowError()));
+        if (warnings.empty() || warningLoadInProgress) return;
+        if (incompatibilityModal && incompatibilityModal->___m_CachedPtr.m_value && incompatibilityModal->get_isShown()) return;
+        warningLoadInProgress = true;
+        try {
+            BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(_ShowError(warningGeneration)));
+        } catch (...) {
+            warningLoadInProgress = false;
+            throw;
+        }
     }
 
-    custom_types::Helpers::Coroutine FilterUI::_ShowError() {
-		warningLoadInProgress = true;
-        // wait till we can display
-        while (!failTextLabel || !failTextLabel->___m_CachedPtr.m_value) co_yield nullptr;
+    custom_types::Helpers::Coroutine FilterUI::_ShowError(std::uint64_t generation) {
+        auto owner = safe_ptr<FilterUI*, false>(this);
+        i2c::on_scope_exit resetProgress([owner, generation] {
+            if (owner->warningGeneration == generation) owner->warningLoadInProgress = false;
+        });
+        while (generation == warningGeneration && (!failTextLabel || !failTextLabel->___m_CachedPtr.m_value)) co_yield nullptr;
+        if (generation != warningGeneration) co_return;
 
-        auto x = failTextLabel->GetComponentInParent<HMUI::ViewController*>();
-        if (x && x->___m_CachedPtr.m_value) {
-            while (x->get_isInTransition()) co_yield nullptr;
+        auto label = safe_ptr<TMPro::TextMeshProUGUI*>(failTextLabel);
+        auto modal = safe_ptr<BSML::ModalView*>(incompatibilityModal);
+        auto view = safe_ptr<HMUI::ViewController*>(label->GetComponentInParent<HMUI::ViewController*>());
+        auto isCurrent = [&] {
+            return generation == warningGeneration && label && modal && view &&
+                label.ptr() == failTextLabel && modal.ptr() == incompatibilityModal;
+        };
+        while (isCurrent() && view->get_isInTransition()) co_yield nullptr;
+        if (!isCurrent() || !view->get_isActivated() || warnings.empty() || modal->get_isShown()) co_return;
 
-            if (x->get_isActivated() && warnings.size() > 0) {
-                failTextLabel->set_text(warnings.front());
-                warnings.pop();
-
-                if (incompatibilityModal && incompatibilityModal->___m_CachedPtr.m_value) {
-                    incompatibilityModal->Show();
-                }
-            }
-        }
-
-		warningLoadInProgress = false;
-        co_return;
+        label->set_text(warnings.front());
+        modal->Show();
+        warnings.pop();
     }
 
     void FilterUI::CloseWarningModal() {
-        if (incompatibilityModal && incompatibilityModal->___m_CachedPtr.m_value) {
-            incompatibilityModal->Hide();
+        auto modal = safe_ptr<BSML::ModalView*>(incompatibilityModal);
+        if (warningLoadInProgress || !modal || !modal->get_isShown()) return;
+        warningLoadInProgress = true;
+        try {
+            modal->HMUI::ModalView::Hide(true, BSML::MakeSystemAction([owner = safe_ptr<FilterUI*, false>(this), modal, generation = warningGeneration] {
+                if (owner->warningGeneration != generation || owner->incompatibilityModal != modal.ptr()) return;
+                owner->warningLoadInProgress = false;
+                owner->PossiblyShowNextWarning();
+            }));
+        } catch (...) {
+            warningLoadInProgress = false;
+            throw;
         }
-        PossiblyShowNextWarning();
     }
-
 }

@@ -17,6 +17,7 @@
 #include "IFilter.hpp"
 
 #include <queue>
+#include <cstdint>
 
 DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject) {
     DECLARE_INSTANCE_FIELD(UnityEngine::RectTransform*, root);
@@ -63,5 +64,6 @@ DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject) {
 
         std::queue<std::string> warnings;
 
-        custom_types::Helpers::Coroutine _ShowError();
+        std::uint64_t warningGeneration = 0;
+        custom_types::Helpers::Coroutine _ShowError(std::uint64_t generation);
 };
