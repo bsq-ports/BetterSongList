@@ -112,8 +112,7 @@ namespace BetterSongList {
                 this->eventsMapped = true;
             }
 
-            auto hasLoaded = SongCore::API::Loading::AreSongsLoaded();
-            while(!hasLoaded) std::this_thread::yield();
+            while (!SongCore::API::Loading::AreSongsLoaded()) std::this_thread::yield();
             
             this->FolderDateSorter::GatherFolderInfoThread(fullReload);
         });
