@@ -1,3 +1,4 @@
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "Patches/UI/ScrollEnhancement.hpp"
 #include "config.hpp"
 #include "logging.hpp"
@@ -29,7 +30,7 @@ void Scroll(HMUI::TableView* table, float step, int direction) {
 }
 
 namespace BetterSongList::Hooks {
-    std::array<SafePtrUnity<UnityEngine::GameObject>, 4> ScrollEnhancement::buttons;
+    std::array<safe_ptr<UnityEngine::GameObject*>, 4> ScrollEnhancement::buttons;
 
     void ScrollEnhancement::GameRestart() {
         for (auto& btn : buttons) {
@@ -64,7 +65,7 @@ namespace BetterSongList::Hooks {
                 ->get_parent() // LevelCollectionViewController
             );
 
-        auto newBtn = newBtnGo->get_transform().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
+        auto newBtn = newBtnGo->get_transform().try_cast<UnityEngine::RectTransform>();
         newBtn->set_anchorMin({0.92f, 0.893f - vOffs});
         newBtn->set_anchorMax({0.96f, 0.953f - vOffs});
 
@@ -91,12 +92,12 @@ namespace BetterSongList::Hooks {
         storedTable = table;
         co_yield reinterpret_cast<System::Collections::IEnumerator*>(UnityEngine::WaitForEndOfFrame::New_ctor());
 
-        auto r = table->get_transform()->get_parent()->get_parent().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
+        auto r = table->get_transform()->get_parent()->get_parent().try_cast<UnityEngine::RectTransform>();
         auto sizeDelta = r->get_sizeDelta();
         sizeDelta.x += 4;
         r->set_sizeDelta(sizeDelta);
 
-        r = table->get_transform()->get_parent().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
+        r = table->get_transform()->get_parent().try_cast<UnityEngine::RectTransform>();
         auto anchorMin = r->get_anchorMin();
         anchorMin.x += 0.02f;
         r->set_anchorMin(anchorMin);
@@ -108,7 +109,7 @@ namespace BetterSongList::Hooks {
 
         // move the scroll bar to the right slightly
         static ConstString scrollBar{"ScrollBar"};
-        auto bar = a->Find(scrollBar).try_cast<UnityEngine::RectTransform>().value_or(nullptr);
+        auto bar = a->Find(scrollBar).try_cast<UnityEngine::RectTransform>();
         auto min = bar->get_anchorMin();
         min.x -= 0.04f;
         bar->set_anchorMin(min);

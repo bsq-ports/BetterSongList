@@ -1,5 +1,7 @@
 #pragma once
 
+#include "beatsaber-hook/shared/safeptr.hpp"
+
 #include "custom-types/shared/coroutine.hpp"
 #include "custom-types/shared/macros.hpp"
 #include "bsml/shared/BSML.hpp"
@@ -55,7 +57,7 @@ DECLARE_CLASS_CODEGEN(BetterSongList, FilterUI, Il2CppObject) {
         void ShowErrorASAP(std::string_view text = "");
 
     private:
-        static SafePtr<FilterUI> instance;
+        static safe_ptr<FilterUI*, false> instance;
         static std::map<std::string, BetterSongList::ISorter*> sortOptions;
         static std::map<std::string, BetterSongList::IFilter*> filterOptions;
 

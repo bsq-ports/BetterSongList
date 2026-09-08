@@ -1,5 +1,7 @@
 #pragma once
 
+#include "beatsaber-hook/shared/safeptr.hpp"
+
 #include "custom-types/shared/coroutine.hpp"
 #include "UnityEngine/GameObject.hpp"
 #include "TMPro/TextMeshProUGUI.hpp"
@@ -28,9 +30,9 @@ namespace BetterSongList::Hooks {
 
         private:
             static custom_types::Helpers::Coroutine ProcessFields();
-            static SafePtrUnity<GlobalNamespace::StandardLevelDetailView> lastInstance;
-            static SafePtrUnity<UnityEngine::GameObject> extraUI;
-            static SafePtr<Array<TMPro::TextMeshProUGUI*>> fields;
-            static SafePtrUnity<HMUI::HoverHintController> hoverHintController;
+            static safe_ptr<GlobalNamespace::StandardLevelDetailView*> lastInstance;
+            static safe_ptr<UnityEngine::GameObject*> extraUI;
+            static safe_ptr<ArrayW<TMPro::TextMeshProUGUI*>> fields;
+            static safe_ptr<HMUI::HoverHintController*> hoverHintController;
     };
 }

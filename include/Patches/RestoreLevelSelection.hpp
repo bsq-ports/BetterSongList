@@ -1,5 +1,7 @@
 #pragma once
 
+#include "beatsaber-hook/shared/safeptr.hpp"
+
 #include "GlobalNamespace/LevelSelectionFlowCoordinator.hpp"
 #include "GlobalNamespace/LevelFilteringNavigationController.hpp"
 #include "GlobalNamespace/BeatmapLevelPack.hpp"
@@ -15,6 +17,6 @@ namespace BetterSongList::Hooks {
             static GlobalNamespace::BeatmapLevelPack* get_restoredPack();
         private:
             static void LoadPackFromCollectionName(GlobalNamespace::BeatmapLevelsModel* levelsModel);
-            static SafePtr<GlobalNamespace::BeatmapLevelPack> restoredPack;
+            static safe_ptr<GlobalNamespace::BeatmapLevelPack*> restoredPack;
     };
 }

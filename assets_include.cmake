@@ -14,7 +14,7 @@ set(ASSET_HEADER_DATA
     "#pragma once
 
 #include <string_view>
-#include \"beatsaber-hook/shared/utils/typedefs.h\"
+#include \"beatsaber-hook/shared/arrayw.hpp\"
 
 struct IncludedAsset {
 
@@ -32,16 +32,16 @@ struct IncludedAsset {
     }
 
     operator std::string_view() const {
-        return { reinterpret_cast<char*>(array->_values), array->get_Length() };
+        return { reinterpret_cast<char*>(array->_values), array->max_length };
     }
 
     operator std::span<uint8_t>() const {
-        return { array->_values, array->get_Length() };
+        return { array->_values, array->max_length };
     }
 
     void init() const {
         if(!array->klass)
-            array->klass = classof(Array<uint8_t>*);
+            array->klass = i2c::class_of<Array<uint8_t>*>();
     }
 
     private:

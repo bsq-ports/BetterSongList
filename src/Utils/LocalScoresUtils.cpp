@@ -1,3 +1,6 @@
+#include "beatsaber-hook/shared/threading.hpp"
+#include "beatsaber-hook/shared/listw.hpp"
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "Utils/LocalScoresUtils.hpp"
 
 #include "GlobalNamespace/PlayerDataModel.hpp"
@@ -18,7 +21,7 @@
 #define COROUTINE(coroutine) BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(coroutine));
 
 namespace BetterSongList::LocalScoresUtils {
-    SafePtrUnity<GlobalNamespace::PlayerDataModel> playerDataModel;
+    safe_ptr<GlobalNamespace::PlayerDataModel*> playerDataModel;
 
     std::unordered_set<std::string> playedMaps;
     std::shared_mutex mutex_playedMaps;
@@ -64,7 +67,7 @@ namespace BetterSongList::LocalScoresUtils {
         if (isLoadingScores || !get_playerDataModel()) return;
         isLoadingScores = true;
         
-        il2cpp_utils::il2cpp_aware_thread([](){
+        il2cpp_thread([](){
             try {
                 auto playerData = playerDataModel ? playerDataModel->_playerData : nullptr;
                 if (!playerData) {

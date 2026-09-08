@@ -1,5 +1,7 @@
 #pragma once
 
+#include "beatsaber-hook/shared/safeptr.hpp"
+
 #include "custom-types/shared/coroutine.hpp"
 #include "GlobalNamespace/LevelCollectionTableView.hpp"
 #include "UnityEngine/GameObject.hpp"
@@ -15,7 +17,7 @@ namespace BetterSongList::Hooks {
         private:
             static UnityEngine::Transform* BuildButton(UnityEngine::Transform* baseButton, StringW Icon, float vOffs, float rotation, std::function<void()> cb);
             static custom_types::Helpers::Coroutine SetupExtraScrollButtons(HMUI::TableView* table, UnityEngine::Transform* a);
-            static std::array<SafePtrUnity<UnityEngine::GameObject>, 4> buttons;
+            static std::array<safe_ptr<UnityEngine::GameObject*>, 4> buttons;
             
     };
 }

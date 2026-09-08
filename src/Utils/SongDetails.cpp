@@ -1,5 +1,7 @@
 #include "Utils/SongDetails.hpp"
+#include "GlobalNamespace/BeatmapCharacteristicExtensions.hpp"
 #include "logging.hpp"
+#include "songcore/shared/SongCore.hpp"
 
 #include <thread>
 
@@ -62,6 +64,8 @@ namespace BetterSongList::SongDetails {
         SongDetailsCache::MapCharacteristic StringToBeatStarCharacteristics(std::string_view serializedName)
         {
             if (serializedName.empty()) return SongDetailsCache::MapCharacteristic::Custom;
+            if (serializedName == "90Degree") return SongDetailsCache::MapCharacteristic::NinetyDegree;
+            if (serializedName == "360Degree") return SongDetailsCache::MapCharacteristic::ThreeSixtyDegree;
 
             switch(serializedName.data()[0])
             {
@@ -84,23 +88,23 @@ namespace BetterSongList::SongDetails {
             }
         }
 
-        /// @brief gets the serializedName from the game object
-        /// @param char_ the characteristic SO to get thet name for
-        /// @return string serialized name
-        std::string BeatmapCharacteristicToString(GlobalNamespace::BeatmapCharacteristicSO* char_)
-        {
-            #if defined __has_include && __has_include("GlobalNamespace/BeatmapCharacteristicSO.hpp")
-            return char_->get_serializedName();
-            #else
-            return CRASH_UNLESS(il2cpp_utils::RunMethod<StringW>(char_, "get_serializedName"));
-            #endif
+    std::string BeatmapCharacteristicToString(GlobalNamespace::BeatmapCharacteristic characteristic) {
+        using Characteristic = GlobalNamespace::BeatmapCharacteristic;
+        switch (characteristic.value__) {
+            case Characteristic::Standard.value__:
+            case Characteristic::OneSaber.value__:
+            case Characteristic::NoArrows.value__:
+            case Characteristic::Degree90.value__:
+            case Characteristic::Degree360.value__:
+            case Characteristic::Legacy.value__:
+                return GlobalNamespace::BeatmapCharacteristicExtensions::SerializedName(characteristic);
         }
+        auto custom = SongCore::API::Characteristics::GetCharacteristic(characteristic);
+        return custom ? custom->serializedName : "";
+    }
 
-        /// @brief gets the characteristic that belongs with this game SO
-        /// @param  char_ characteristicSO to get the characteristic for
-        /// @return song_data_core::BeatStarCharacteristics
-        SongDetailsCache::MapCharacteristic BeatmapCharacteristicToBeatStarCharacteristic(GlobalNamespace::BeatmapCharacteristicSO* char_)
-        {
-            return StringToBeatStarCharacteristics(BeatmapCharacteristicToString(char_));
-        }
+    SongDetailsCache::MapCharacteristic BeatmapCharacteristicToBeatStarCharacteristic(GlobalNamespace::BeatmapCharacteristic characteristic) {
+        if (characteristic == GlobalNamespace::BeatmapCharacteristic::Legacy) return SongDetailsCache::MapCharacteristic::Custom;
+        return StringToBeatStarCharacteristics(BeatmapCharacteristicToString(characteristic));
+    }
 }

@@ -1,3 +1,4 @@
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "UI/Settings.hpp"
 #include "assets.hpp"
 
@@ -6,7 +7,7 @@
 DEFINE_TYPE(BetterSongList, Settings);
 
 namespace BetterSongList {
-    SafePtr<Settings> Settings::instance;
+    safe_ptr<Settings*, false> Settings::instance;
 
     Settings* Settings::get_instance() {
         if (!instance || !instance.ptr()) {

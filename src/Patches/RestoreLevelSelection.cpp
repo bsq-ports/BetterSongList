@@ -1,3 +1,4 @@
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "Patches/RestoreLevelSelection.hpp"
 #include "Patches/RestoreTableScroll.hpp"
 #include "Patches/HookLevelCollectionTableSet.hpp"
@@ -24,7 +25,7 @@
 #include <string>
 
 namespace BetterSongList::Hooks {
-    SafePtr<GlobalNamespace::BeatmapLevelPack> RestoreLevelSelection::restoredPack;
+    safe_ptr<GlobalNamespace::BeatmapLevelPack*> RestoreLevelSelection::restoredPack;
 
     GlobalNamespace::BeatmapLevelPack* RestoreLevelSelection::get_restoredPack() {
         if (!restoredPack) {
@@ -66,7 +67,7 @@ namespace BetterSongList::Hooks {
         if (m) {
             // if the level is custom and we're trying to restore to music packs, switch to customsongs
             // TODO: Maybe check if we actually have the level in the pack?
-            auto customLevel = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(m).value_or(nullptr);
+            auto customLevel = i2c::try_cast<SongCore::SongLoader::CustomBeatmapLevel*>(m);
             if (customLevel) {
                 if (restoreCategory == GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::MusicPacks) {
                     restoreCategory = GlobalNamespace::SelectLevelCategoryViewController::LevelCategory::CustomSongs;
@@ -135,7 +136,7 @@ namespace BetterSongList::Hooks {
             return;
         }
 
-        restoredPack.emplace(levelsModel->____allLoadedBeatmapLevelsRepository->GetBeatmapLevelPackByPackId(config.get_lastPack()));
+        restoredPack.emplace(levelsModel->____allLoadedBeatmapLevelsRepository->GetBeatmapLevelPackByPackId(config.get_lastPack(), false));
     }
 
     void RestoreLevelSelection::LevelFilteringNavigationController_ShowPacksInSecondChildController_Prefix(GlobalNamespace::LevelFilteringNavigationController* self, StringW& levelPackIdToBeSelectedAfterPresent) {

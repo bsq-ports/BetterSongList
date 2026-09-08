@@ -1,3 +1,4 @@
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "Patches/HookSelectedCollection.hpp"
 #include "config.hpp"
 #include "logging.hpp"
@@ -12,7 +13,7 @@
 #include "UI/FilterUI.hpp"
 
 namespace BetterSongList::Hooks {
-    SafePtr<GlobalNamespace::BeatmapLevelPack> HookSelectedCollection::lastSelectedCollection;
+    safe_ptr<GlobalNamespace::BeatmapLevelPack*> HookSelectedCollection::lastSelectedCollection;
 
     GlobalNamespace::BeatmapLevelPack* HookSelectedCollection::get_lastSelectedCollection() {
         if (!lastSelectedCollection) {

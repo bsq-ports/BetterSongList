@@ -1,5 +1,7 @@
 #pragma once
 
+#include "beatsaber-hook/shared/safeptr.hpp"
+
 #include "GlobalNamespace/AnnotatedBeatmapLevelCollectionsViewController.hpp"
 #include "GlobalNamespace/BeatmapLevelPack.hpp"
 #include "GlobalNamespace/SelectLevelCategoryViewController.hpp"
@@ -15,6 +17,6 @@ namespace BetterSongList::Hooks {
             /// @brief no prio
             static void LevelFilteringNavigationController_UpdateSecondChildControllerContent_Prefix(GlobalNamespace::SelectLevelCategoryViewController::LevelCategory levelCategory);
         private:
-            static SafePtr<GlobalNamespace::BeatmapLevelPack> lastSelectedCollection;
+            static safe_ptr<GlobalNamespace::BeatmapLevelPack*> lastSelectedCollection;
     };
 }

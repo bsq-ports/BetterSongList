@@ -1,4 +1,5 @@
 #include "hooking.hpp"
+#include "System/Collections/Generic/List_1.hpp"
 #include "logging.hpp"
 
 #include "custom-types/shared/coroutine.hpp"
@@ -13,8 +14,7 @@
 #include "System/Action_2.hpp"
 #include "System/Collections/Generic/HashSet_1.hpp"
 
-#include "sombrero/shared/linq_functional.hpp"
-using namespace Sombrero::Linq::Functional;
+
 
 // just this because it's so fukin long
 template<typename T>

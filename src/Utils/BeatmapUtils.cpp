@@ -2,7 +2,7 @@
 #include "Sorters/SortMethods.hpp"
 #include "logging.hpp"
 #include <regex>
-#include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
+#include "GlobalNamespace/BeatmapCharacteristic.hpp"
 
 namespace BetterSongList::BeatmapUtils {
     int indexOf(const std::string& haystack, const std::string& needle) {
@@ -37,16 +37,13 @@ namespace BetterSongList::BeatmapUtils {
     }
     
     int GetCharacteristicFromDifficulty(GlobalNamespace::BeatmapKey diff) {
-        auto chara = diff.beatmapCharacteristic;
-        auto d = chara ? chara->get_sortingOrder() : 0;
-        if (d == 0 || d > 4) return 0;
-
-        if (d == 3)
-            d = 4;
-        else if (d == 4)
-            d = 3;
-
-        return d + 1;
+        using Characteristic = GlobalNamespace::BeatmapCharacteristic;
+        const auto characteristic = diff.characteristic;
+        if (characteristic == Characteristic::NoArrows) return 2;
+        if (characteristic == Characteristic::OneSaber) return 3;
+        if (characteristic == Characteristic::Degree90) return 4;
+        if (characteristic == Characteristic::Degree360) return 5;
+        return 0;
     }
 
     std::string CleanText(std::string_view text) {

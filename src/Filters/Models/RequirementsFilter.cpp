@@ -28,7 +28,7 @@ namespace BetterSongList {
     }
 
     bool RequirementsFilter::GetValueFor(GlobalNamespace::BeatmapLevel* level) {
-        auto customLevel = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(level).value_or(nullptr);
+        auto customLevel = i2c::try_cast<SongCore::SongLoader::CustomBeatmapLevel*>(level);
         if (!customLevel) {
             DEBUG("Level was not custom level!");
             return invert;

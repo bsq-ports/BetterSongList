@@ -1,17 +1,8 @@
 #pragma once
-#include "beatsaber-hook/shared/utils/logging.hpp"
-#include "beatsaber-hook/shared/utils/typedefs.h"
+#include "beatsaber-hook/shared/stringw.hpp"
 #include <string_view>
 
 #include "paper2_scotland2/shared/logger.hpp"
-
-template <> struct fmt::formatter<::StringW> : formatter<string_view> {
-    // parse is inherited from formatter<string_view>.
-    template <typename FormatContext>
-    auto format(StringW s, FormatContext& ctx) {
-        return formatter<string_view>::format(s ? static_cast<std::string>(s) : "NULL", ctx);
-    }
-};
 
 namespace BSLLogger {
     static constexpr auto Logger = Paper::ConstLoggerContext(MOD_ID);

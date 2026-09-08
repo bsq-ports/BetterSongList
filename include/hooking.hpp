@@ -1,7 +1,6 @@
 #pragma once
 
-#include "beatsaber-hook/shared/utils/hooking.hpp"
-#include <concepts>
+#include "beatsaber-hook/shared/hooking.hpp"
 
 namespace BetterSongList {
     class Hooking {
@@ -13,71 +12,34 @@ namespace BetterSongList {
             installFuncs.push_back(installFunc);
         }
 
-        static inline void InstallHooks() {
-            for (auto& func : installFuncs) func();
+        static void InstallHooks() {
+            for (auto func : installFuncs) func();
         }
     };
-
-    template<auto mPtr>
-    concept has_metadata = requires() {
-        { ::il2cpp_utils::il2cpp_type_check::MetadataGetter<mPtr>::methodInfo() } -> std::same_as<MethodInfo const*>;
-    };
-
-    template<auto mPtr>
-    requires(has_metadata<mPtr>)
-    using Metadata = ::il2cpp_utils::il2cpp_type_check::MetadataGetter<mPtr>;
-
-    /// @brief checks whether the function is match hookable, which requires the function to be at least 5 (5 * 4 = 20 bytes) instructions and not have an address of 0 (abstract/virtual funcs)
-    template<auto mPtr>
-    concept match_hookable = has_metadata<mPtr> && Metadata<mPtr>::size >= (0x5 * sizeof(int32_t)) && Metadata<mPtr>::addrs != 0xffffffff;
 }
 
-#define HOOK_AUTO_INSTALL_ORIG(name_)                                                                       \
-    struct Auto_Hook_##name_ {                                                                              \
-        static void Auto_Hook_##name_##_Install() {                                                         \
-            static constexpr auto logger = Paper::ConstLoggerContext(MOD_ID "_Install_" #name_);            \
-            ::Hooking::InstallOrigHook<Hook_##name_>(logger);                                               \
-        }                                                                                                   \
-        Auto_Hook_##name_() { ::BetterSongList::Hooking::AddInstallFunc(Auto_Hook_##name_##_Install); }     \
-    };                                                                                                      \
-    static Auto_Hook_##name_ Auto_Hook_Instance_##name_
+#define BSL_AUTO_HOOK(name_, method, retval, installer, ...)                         \
+    struct Auto_Hook_##name_ {                                                      \
+        static void Install();                                                     \
+        Auto_Hook_##name_() { BetterSongList::Hooking::AddInstallFunc(Install); }     \
+    };                                                                             \
+    static Auto_Hook_##name_ Auto_Hook_Instance_##name_;                             \
+    struct hook_##name_ {                                                          \
+        static constexpr auto cast_test = []<typename T>() { return requires { static_cast<T>(method); }; }; \
+        using func_t = retval (*)(__VA_ARGS__);                                    \
+        using cast_t = ::i2c::detail::method_check<cast_test, func_t>::type;          \
+        static_assert(cast_test.operator()<cast_t>(), "Hook method signature does not match!"); \
+        static_assert(::i2c::detail::match_hookable<static_cast<cast_t>(method)>, "Method cannot be hooked!"); \
+        __INTERNAL_HOOK_STRUCT(name_, ::i2c::metadata_getter<static_cast<cast_t>(method)>::method_info(), retval, __VA_ARGS__) \
+    };                                                                             \
+    void Auto_Hook_##name_::Install() {                                             \
+        static constexpr auto logger = Paper::ConstLoggerContext(MOD_ID);           \
+        installer<hook_##name_>(logger);                                           \
+    }                                                                              \
+    retval hook_##name_::hook_m_##name_(__VA_ARGS__)
 
-#define HOOK_AUTO_INSTALL(name_)                                                                         \
-    struct Auto_Hook_##name_ {                                                                           \
-        static void Auto_Hook_##name_##_Install() {                                                      \
-            static constexpr auto logger = Paper::ConstLoggerContext(MOD_ID "_Install_" #name_);         \
-            ::Hooking::InstallHook<Hook_##name_>(logger);                                                \
-        }                                                                                                \
-        Auto_Hook_##name_() { ::BetterSongList::Hooking::AddInstallFunc(Auto_Hook_##name_##_Install); }  \
-    };                                                                                                   \
-    static Auto_Hook_##name_ Auto_Hook_Instance_##name_
+#define MAKE_AUTO_HOOK_MATCH(name_, method, retval, ...) \
+    BSL_AUTO_HOOK(name_, method, retval, ::i2c::install_hook, __VA_ARGS__)
 
-#define MAKE_AUTO_HOOK_MATCH(name_, mPtr, retval, ...)                                                                                              \
-    struct Hook_##name_ {                                                                                                                           \
-        using funcType = retval (*)(__VA_ARGS__);                                                                                                   \
-        static_assert(BetterSongList::match_hookable<mPtr>);                                                                                        \
-        static_assert(std::is_same_v<funcType, ::Hooking::InternalMethodCheck<decltype(mPtr)>::funcType>, "Hook method signature does not match!"); \
-        constexpr static const char* name() { return #name_; }                                                                                      \
-        static const MethodInfo* getInfo() { return ::il2cpp_utils::il2cpp_type_check::MetadataGetter<mPtr>::methodInfo(); }                        \
-        static funcType* trampoline() { return &name_; }                                                                                            \
-        static inline retval (*name_)(__VA_ARGS__) = nullptr;                                                                                       \
-        static funcType hook() { return &::Hooking::HookCatchWrapper<&hook_##name_, funcType>::wrapper; }                                           \
-        static retval hook_##name_(__VA_ARGS__);                                                                                                    \
-    };                                                                                                                                              \
-    HOOK_AUTO_INSTALL(name_);                                                                                                                       \
-    retval Hook_##name_::hook_##name_(__VA_ARGS__)
-
-#define MAKE_AUTO_HOOK_ORIG_MATCH(name_, mPtr, retval, ...)                                                                                         \
-    struct Hook_##name_ {                                                                                                                           \
-        using funcType = retval (*)(__VA_ARGS__);                                                                                                   \
-        static_assert(BetterSongList::match_hookable<mPtr>);                                                                                        \
-        static_assert(std::is_same_v<funcType, ::Hooking::InternalMethodCheck<decltype(mPtr)>::funcType>, "Hook method signature does not match!"); \
-        constexpr static const char* name() { return #name_; }                                                                                      \
-        static const MethodInfo* getInfo() { return ::il2cpp_utils::il2cpp_type_check::MetadataGetter<mPtr>::methodInfo(); }                        \
-        static funcType* trampoline() { return &name_; }                                                                                            \
-        static inline retval (*name_)(__VA_ARGS__) = nullptr;                                                                                       \
-        static funcType hook() { return &::Hooking::HookCatchWrapper<&hook_##name_, funcType>::wrapper; }                                           \
-        static retval hook_##name_(__VA_ARGS__);                                                                                                    \
-    };                                                                                                                                              \
-    HOOK_AUTO_INSTALL_ORIG(name_);                                                                                                                  \
-    retval Hook_##name_::hook_##name_(__VA_ARGS__)
+#define MAKE_AUTO_HOOK_ORIG_MATCH(name_, method, retval, ...) \
+    BSL_AUTO_HOOK(name_, method, retval, ::i2c::install_hook_orig, __VA_ARGS__)

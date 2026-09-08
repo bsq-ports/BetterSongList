@@ -1,5 +1,7 @@
 #pragma once
 
+#include "beatsaber-hook/shared/safeptr.hpp"
+
 #include "ISorter.hpp"
 #include "IFilter.hpp"
 
@@ -28,9 +30,9 @@ namespace BetterSongList::Hooks {
             static void FilterWrapper(ArrayW<GlobalNamespace::BeatmapLevel*>& previewBeatmapLevels);
             static bool PrepareStuffIfNecessary(std::function<void()> cb = nullptr, bool cbOnAlreadyPrepared = false);
             static std::function<void(ArrayW<GlobalNamespace::BeatmapLevel*>)> recallLast;
-            static SafePtr<Array<GlobalNamespace::BeatmapLevel*>> lastInMapList;
-            static SafePtr<Array<GlobalNamespace::BeatmapLevel*>> lastOutMapList;
-            static SafePtr<Array<GlobalNamespace::BeatmapLevel*>> asyncPreProcessed;
+            static safe_ptr<ArrayW<GlobalNamespace::BeatmapLevel*>> lastInMapList;
+            static safe_ptr<ArrayW<GlobalNamespace::BeatmapLevel*>> lastOutMapList;
+            static safe_ptr<ArrayW<GlobalNamespace::BeatmapLevel*>> asyncPreProcessed;
             static ISorterWithLegend::Legend customLegend;
             static bool prepareThreadCurrentlyRunning;
             static bool tryReselectLastSelectedLevel;

@@ -1,3 +1,4 @@
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "UI/FilterUI.hpp"
 #include "UI/Settings.hpp"
 #include "config.hpp"
@@ -34,7 +35,7 @@ using namespace UnityEngine;
 
 namespace BetterSongList {
     using namespace Hooks;
-    SafePtr<FilterUI> FilterUI::instance;
+    safe_ptr<FilterUI*, false> FilterUI::instance;
     std::map<std::string, BetterSongList::ISorter*> FilterUI::sortOptions;
     std::map<std::string, BetterSongList::IFilter*> FilterUI::filterOptions;
 

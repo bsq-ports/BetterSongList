@@ -2,7 +2,7 @@
 
 #include "GlobalNamespace/BeatmapLevel.hpp"
 #include "System/Collections/Generic/List_1.hpp"
-#include "beatsaber-hook/shared/utils/typedefs.h"
+#include "beatsaber-hook/shared/arrayw.hpp"
 
 namespace BetterSongList::Hooks {
     class ImproveBasegameSearch {

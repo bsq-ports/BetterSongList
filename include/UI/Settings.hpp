@@ -1,5 +1,7 @@
 #pragma once
 
+#include "beatsaber-hook/shared/safeptr.hpp"
+
 #include "custom-types/shared/macros.hpp"
 #include "bsml/shared/macros.hpp"
 #include "bsml/shared/BSML/Components/ModalView.hpp"
@@ -37,5 +39,5 @@ DECLARE_CLASS_CODEGEN(BetterSongList, Settings, Il2CppObject) {
         static std::string get_version();
         static Settings* get_instance();
     private:
-        static SafePtr<Settings> instance;
+        static safe_ptr<Settings*, false> instance;
 };

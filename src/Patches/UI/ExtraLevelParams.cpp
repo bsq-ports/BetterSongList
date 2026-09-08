@@ -1,3 +1,4 @@
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "Patches/UI/ExtraLevelParams.hpp"
 #include "config.hpp"
 #include "logging.hpp"
@@ -55,10 +56,10 @@ SongDetailsCache::MapDifficulty BeatmapDifficultyToString(int value) {
 }
 
 namespace BetterSongList::Hooks {
-    SafePtrUnity<GlobalNamespace::StandardLevelDetailView> ExtraLevelParams::lastInstance;
-    SafePtrUnity<UnityEngine::GameObject> ExtraLevelParams::extraUI;
-    SafePtr<Array<TMPro::TextMeshProUGUI*>> ExtraLevelParams::fields;
-    SafePtrUnity<HMUI::HoverHintController> ExtraLevelParams::hoverHintController;
+    safe_ptr<GlobalNamespace::StandardLevelDetailView*> ExtraLevelParams::lastInstance;
+    safe_ptr<UnityEngine::GameObject*> ExtraLevelParams::extraUI;
+    safe_ptr<ArrayW<TMPro::TextMeshProUGUI*>> ExtraLevelParams::fields;
+    safe_ptr<HMUI::HoverHintController*> ExtraLevelParams::hoverHintController;
 
     GlobalNamespace::StandardLevelDetailView* ExtraLevelParams::get_lastInstance() {
         if (!lastInstance) {
@@ -169,7 +170,7 @@ namespace BetterSongList::Hooks {
 
         lastInstance = self;
 
-        auto basicData = level->GetDifficultyBeatmapData(selectedDifficultyBeatmap.beatmapCharacteristic, selectedDifficultyBeatmap.difficulty);
+        auto basicData = level->GetDifficultyBeatmapData(selectedDifficultyBeatmap.characteristic, selectedDifficultyBeatmap.difficulty);
 
         if (get_fields()) {
             auto fieldsW = get_fields();
@@ -179,8 +180,8 @@ namespace BetterSongList::Hooks {
                 fieldsW[1]->set_text("N/A");
             } else if (BetterSongList::SongDetails::get_songDetails()->songs.size() != 0) {
                 INFO("details available, not empty");
-                auto characteristic = selectedDifficultyBeatmap.beatmapCharacteristic;
-                auto ch = characteristic ? BetterSongList::SongDetails::BeatmapCharacteristicToBeatStarCharacteristic(characteristic) : SongDetailsCache::MapCharacteristic::Custom;
+                auto characteristic = selectedDifficultyBeatmap.characteristic;
+                auto ch = BetterSongList::SongDetails::BeatmapCharacteristicToBeatStarCharacteristic(characteristic);
 
                 if (ch != SongDetailsCache::MapCharacteristic::Standard) {
                     INFO("Characteristic was not standard");
@@ -250,7 +251,7 @@ namespace BetterSongList::Hooks {
                 fieldsW[1]->set_text("...");
             }
 
-            auto customBeatmapLevelOpt = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(level);
+            auto customBeatmapLevelOpt = i2c::try_cast<SongCore::SongLoader::CustomBeatmapLevel*>(level);
             // Basegame maps have no NJS or JD
             if (customBeatmapLevelOpt) {
                 float_t njs = basicData->___noteJumpMovementSpeed;

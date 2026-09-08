@@ -1,4 +1,5 @@
 #include "hooking.hpp"
+#include "System/Collections/Generic/List_1.hpp"
 
 #include "Patches/HookBeatmapDataLoader.hpp"
 

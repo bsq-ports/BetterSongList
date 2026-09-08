@@ -1,6 +1,6 @@
 #pragma once
 
-#include "beatsaber-hook/shared/utils/typedefs.h"
+#include "beatsaber-hook/shared/arrayw.hpp"
 #include "GlobalNamespace/BeatmapLevel.hpp"
 #include <unordered_map>
 #include <optional>

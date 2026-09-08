@@ -1,7 +1,8 @@
 {
-  "_QPVersion": "0.1.2",
+  "_QPVersion": "1.1.0",
   "name": "${mod_name}",
   "id": "${mod_id}",
+  "modloader": "Scotland2",
   "author": "Kinsi55",
   "porter": "RedBrumbler, Pink",
   "version": "${version}",

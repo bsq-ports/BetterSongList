@@ -1,3 +1,4 @@
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include "Patches/HookLevelCollectionTableSet.hpp"
 #include "Patches/HookSelectedCollection.hpp"
 #include "Patches/HookSelectedCategory.hpp"
@@ -19,7 +20,6 @@
 #include "HMUI/AlphabetScrollbar.hpp"
 #include "GlobalNamespace/AlphabetScrollInfo.hpp"
 
-#include "sombrero/shared/linq_functional.hpp"
 #include "bsml/shared/BSML/MainThreadScheduler.hpp"
 #include "bsml/shared/BSML/SharedCoroutineStarter.hpp"
 
@@ -35,12 +35,19 @@
 
 
 namespace BetterSongList::Hooks {
+    static ArrayW<GlobalNamespace::BeatmapLevel*> CloneLevels(ArrayW<GlobalNamespace::BeatmapLevel*> levels) {
+        if (!levels) return nullptr;
+        ArrayW<GlobalNamespace::BeatmapLevel*> copy(levels.size());
+        std::copy(levels.begin(), levels.end(), copy.begin());
+        return copy;
+    }
+
     ISorter* HookLevelCollectionTableSet::sorter;
     IFilter* HookLevelCollectionTableSet::filter;
     std::function<void(ArrayW<GlobalNamespace::BeatmapLevel*>)> HookLevelCollectionTableSet::recallLast;
-    SafePtr<Array<GlobalNamespace::BeatmapLevel*>> HookLevelCollectionTableSet::lastInMapList;
-    SafePtr<Array<GlobalNamespace::BeatmapLevel*>> HookLevelCollectionTableSet::lastOutMapList;
-    SafePtr<Array<GlobalNamespace::BeatmapLevel*>> HookLevelCollectionTableSet::asyncPreProcessed;
+    safe_ptr<ArrayW<GlobalNamespace::BeatmapLevel*>> HookLevelCollectionTableSet::lastInMapList;
+    safe_ptr<ArrayW<GlobalNamespace::BeatmapLevel*>> HookLevelCollectionTableSet::lastOutMapList;
+    safe_ptr<ArrayW<GlobalNamespace::BeatmapLevel*>> HookLevelCollectionTableSet::asyncPreProcessed;
     ISorterWithLegend::Legend HookLevelCollectionTableSet::customLegend;
     bool HookLevelCollectionTableSet::prepareThreadCurrentlyRunning = false;
     bool HookLevelCollectionTableSet::tryReselectLastSelectedLevel = false;
@@ -83,12 +90,11 @@ namespace BetterSongList::Hooks {
 
         if (processAsync) {
             PrepareStuffIfNecessary([](){
-                // TODO: This is kind of a hack fix this to make sure we keep lastInMapList unmodified, it is modified in FilterWrapper
-                using namespace Sombrero::Linq::Functional;
-                auto inList = get_lastInMapList() | ToArray();
+                // Sorting mutates the array, so preserve the cached input order.
+                auto inList = CloneLevels(get_lastInMapList());
 
                 FilterWrapper(inList);
-                asyncPreProcessed.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(inList));
+                asyncPreProcessed.emplace(inList);
                 Refresh(false, false);
             }, true);
             return;
@@ -118,10 +124,15 @@ namespace BetterSongList::Hooks {
 
         DEBUG("FilterWrapper({})", previewBeatmapLevels.size());
 
-        using namespace Sombrero::Linq::Functional;
         if (filter && filter->get_isReady()) {
             INFO("Filtering levels");
-            previewBeatmapLevels = previewBeatmapLevels | Where([filter = filter](auto x){ return filter->GetValueFor(x); }) | ToArray();
+            auto* const activeFilter = filter;
+            std::vector<GlobalNamespace::BeatmapLevel*> filtered;
+            filtered.reserve(previewBeatmapLevels.size());
+            for (auto level : previewBeatmapLevels) {
+                if (activeFilter->GetValueFor(level)) filtered.push_back(level);
+            }
+            previewBeatmapLevels = ArrayW<GlobalNamespace::BeatmapLevel*>(filtered);
         }
 
         INFO("We're down to {}", previewBeatmapLevels.size());
@@ -244,20 +255,17 @@ namespace BetterSongList::Hooks {
             }
         }
 
-        // TODO: This is kind of a hack fix this to make sure we keep lastInMapList unmodified, it is modified in FilterWrapper
-        {
-            using namespace Sombrero::Linq::Functional;
-            lastInMapList.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(previewBeatmapLevels | ToArray()));
-        }
-        
+        // Keep a separate input array because filtering and sorting replace or reorder the output.
+        lastInMapList.emplace(CloneLevels(previewBeatmapLevels));
+
         // This is a callback to call the sort again with the same parameters
         auto isSorted = beatmapLevelsAreSorted;
         recallLast = [self, favoriteLevelIds, isSorted](ArrayW<GlobalNamespace::BeatmapLevel *> overrideData){
             tryReselectLastSelectedLevel = true;
-            auto data = overrideData ? static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(overrideData) : get_lastInMapList();
+            auto data = overrideData ? overrideData : get_lastInMapList();
             INFO("recallLast, Data: {}", data.convert());
             if (data) {
-                INFO("Setting data with {} levels", data->get_Length());
+                INFO("Setting data with {} levels", data.size());
             }
             self->SetData((System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::BeatmapLevel*>*)data.convert(), favoriteLevelIds, isSorted, !isSorted);
         };
@@ -291,9 +299,9 @@ namespace BetterSongList::Hooks {
     static custom_types::Helpers::Coroutine TryReselectLastSelectedSong(GlobalNamespace::LevelCollectionTableView* __instance) {
         // Skip a frame
         co_yield nullptr;
-        
+
         auto lastOutMapList = HookLevelCollectionTableSet::get_lastOutMapList();
-        int lastOutSize = lastOutMapList ? lastOutMapList->get_Length() : 0;
+        int lastOutSize = lastOutMapList ? lastOutMapList.size() : 0;
         if(
             __instance == nullptr || 
             __instance->m_CachedPtr.m_value == nullptr || 
@@ -301,8 +309,8 @@ namespace BetterSongList::Hooks {
         ) {
             co_return;
         }
-        auto level = lastOutMapList->FirstOrDefault([](GlobalNamespace::BeatmapLevel* level) {
-            return level->___levelID == config.get_lastSong();
+        auto level = lastOutMapList.front_or_default([](GlobalNamespace::BeatmapLevel* level) {
+            return level && level->___levelID == config.get_lastSong();
         });
         if (!level) {
             WARNING("LevelCollectionTableView.SetData():Postfix => TryReselectLastSelectedSong: No last selected song found, skipping reselect");
@@ -330,12 +338,12 @@ namespace BetterSongList::Hooks {
     void HookLevelCollectionTableSet::LevelCollectionTableView_SetData_PostFix(GlobalNamespace::LevelCollectionTableView* self, ArrayW<GlobalNamespace::BeatmapLevel*> previewBeatmapLevels) {
         DEBUG("HookLevelCollectionTableSet::PostFix({}, {})", fmt::ptr(self), previewBeatmapLevels ? previewBeatmapLevels.size() : 0);
         lastOutMapList.emplace(static_cast<Array<GlobalNamespace::BeatmapLevel*>*>(previewBeatmapLevels));
-        
+
         if(tryReselectLastSelectedLevel) {
             BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(TryReselectLastSelectedSong(self)));
             tryReselectLastSelectedLevel = false;
         }
-        
+
         // Basegame already handles cleaning up the legend etc
         if (customLegend.empty()) {
             // TODO: Base game issue. Remove when fixed. (Idk, ported cause it was in the original code)
@@ -352,7 +360,7 @@ namespace BetterSongList::Hooks {
         */
         auto alphabetScrollBar = self->____alphabetScrollbar;
         auto data = ArrayW<GlobalNamespace::AlphabetScrollInfo::Data*>(il2cpp_array_size_t(customLegend.size()));
-        DEBUG("Legend size: {}, {}", data->get_Length(), customLegend.size());
+        DEBUG("Legend size: {}, {}", data.size(), customLegend.size());
         for (int i = 0; const auto& [key, value] : customLegend)
             data[i++] = GlobalNamespace::AlphabetScrollInfo::Data::New_ctor(u'?', value);
         DEBUG("Setting data");
@@ -367,8 +375,8 @@ namespace BetterSongList::Hooks {
         customLegend.clear();
 
         // Move the table a bit to the right to accomodate for alphabet scollbar (Basegame behaviour)
-        auto tableViewT = self->____tableView->get_transform().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
-        auto scrollBarT = alphabetScrollBar->get_transform().try_cast<UnityEngine::RectTransform>().value_or(nullptr);
+        auto tableViewT = self->____tableView->get_transform().try_cast<UnityEngine::RectTransform>();
+        auto scrollBarT = alphabetScrollBar->get_transform().try_cast<UnityEngine::RectTransform>();
         tableViewT->set_offsetMin({scrollBarT->get_rect().get_size().x + 1.0f, 0.0f});
         alphabetScrollBar->get_gameObject()->SetActive(true);
         DEBUG("scroll bar active!");

@@ -1,30 +1,20 @@
 #include "config.hpp"
-#include "beatsaber-hook/shared/config/config-utils.hpp"
+#include "beatsaber-hook/shared/utils.hpp"
+#include "reflectcpp/include/rfl/json.hpp"
 #include "logging.hpp"
 
 Config config;
 
-Configuration& get_config() {
-    static Configuration config({MOD_ID, VERSION, 0});
-    config.Load();
-    return config;
-}
-
-#define Save(identifier) doc.AddMember(#identifier, config.identifier, allocator)
+#define Save(identifier) doc[#identifier] = config.identifier
 
 void Config::SaveConfig() {
     INFO("Saving Configuration...");
-    rapidjson::Document& doc = get_config().config;
-
-    doc.RemoveAllMembers();
-    doc.SetObject();
-
-    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+    rfl::Generic::Object doc;
     Save(lastSong);
     Save(lastPack);
     Save(lastSort);
     Save(lastFilter);
-    doc.AddMember("lastCategory", config.get_lastCategory().value__, allocator);
+    doc["lastCategory"] = config.get_lastCategory().value__;
     Save(enableAlphabetScrollBar);
     Save(clearFiltersOnPlaylistSelect);
     Save(modBasegameSearch);
@@ -39,62 +29,56 @@ void Config::SaveConfig() {
     Save(settingsSeenInVersion);
     Save(preferredLeaderboard);
 
-    get_config().Write();
+    try {
+        if (!writefile(get_config_path(MOD_ID), rfl::json::write(doc))) {
+            ERROR("Failed to write configuration");
+            return;
+        }
+    } catch (std::exception const& error) {
+        ERROR("Failed to serialize configuration: {}", error.what());
+        return;
+    }
     INFO("Saved Configuration!");
 }
 
-#define GET_INT(identifier)                                         \
-    auto identifier##_itr = doc.FindMember(#identifier);            \
-    if (identifier##_itr != doc.MemberEnd())                        \
-        config.identifier = identifier##_itr->value.GetInt();       \
-    else                                                            \
-        foundEverything = false;
-
-#define GET_FLOAT(identifier)                                       \
-    auto identifier##_itr = doc.FindMember(#identifier);            \
-    if (identifier##_itr != doc.MemberEnd())                        \
-        config.identifier = identifier##_itr->value.GetFloat();     \
-    else                                                            \
-        foundEverything = false;
-
-#define GET_STRING(identifier)                                                          \
-    auto identifier##_itr = doc.FindMember(#identifier);                                \
-    if (identifier##_itr != doc.MemberEnd())                                            \
-        config.identifier = std::string_view(identifier##_itr->value.GetString());      \
-    else                                                                                \
-        foundEverything = false;
-
-#define GET_BOOL(identifier)                                            \
-    auto identifier##_itr = doc.FindMember(#identifier);                \
-    if (identifier##_itr != doc.MemberEnd())                            \
-        config.identifier = identifier##_itr->value.GetBool();          \
-    else                                                                \
-        foundEverything = false;
+#define Load(identifier, type)                                                     \
+    if (auto value = doc.get(#identifier).and_then([](rfl::Generic const& field) {   \
+        return rfl::from_generic<type>(field);                                     \
+    })) {                                                                         \
+        config.identifier = *value;                                               \
+    } else {                                                                      \
+        foundEverything = false;                                                  \
+    }
 
 
 bool Config::LoadConfig() {
     INFO("Loading Configuration...");
     bool foundEverything = true;
-    rapidjson::Document& doc = get_config().config;
+    auto parsed = rfl::json::read<rfl::Generic::Object>(readfile(get_config_path(MOD_ID)));
+    if (!parsed) {
+        ERROR("Failed to parse configuration: {}", parsed.error().what());
+        return false;
+    }
+    auto const& doc = *parsed;
 
-    GET_STRING(lastSong);
-    GET_STRING(lastPack);
-    GET_STRING(lastSort);
-    GET_STRING(lastFilter);
-    GET_INT(lastCategory);
-    GET_BOOL(enableAlphabetScrollBar);
-    GET_BOOL(clearFiltersOnPlaylistSelect);
-    GET_BOOL(modBasegameSearch);
-    GET_BOOL(autoFilterUnowned);
-    GET_BOOL(extendSongScrollbar);
-    GET_BOOL(allowWipDelete);
-    GET_BOOL(showWarningIfMapHasCrouchWallsBecauseMappersThinkSprinklingThemInRandomlyIsFun);
-    GET_BOOL(showMapJDInsteadOfOffset);
-    GET_FLOAT(accuracyMultiplier);
-    GET_BOOL(allowPluginSortsAndFilters);
-    GET_BOOL(sortAsc);
-    GET_STRING(settingsSeenInVersion);
-    GET_STRING(preferredLeaderboard);
+    Load(lastSong, std::string);
+    Load(lastPack, std::string);
+    Load(lastSort, std::string);
+    Load(lastFilter, std::string);
+    Load(lastCategory, int);
+    Load(enableAlphabetScrollBar, bool);
+    Load(clearFiltersOnPlaylistSelect, bool);
+    Load(modBasegameSearch, bool);
+    Load(autoFilterUnowned, bool);
+    Load(extendSongScrollbar, bool);
+    Load(allowWipDelete, bool);
+    Load(showWarningIfMapHasCrouchWallsBecauseMappersThinkSprinklingThemInRandomlyIsFun, bool);
+    Load(showMapJDInsteadOfOffset, bool);
+    Load(accuracyMultiplier, float);
+    Load(allowPluginSortsAndFilters, bool);
+    Load(sortAsc, bool);
+    Load(settingsSeenInVersion, std::string);
+    Load(preferredLeaderboard, std::string);
 
     if (foundEverything)
         INFO("Loaded Configuration!");

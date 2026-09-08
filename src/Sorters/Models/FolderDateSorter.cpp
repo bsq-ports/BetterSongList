@@ -6,7 +6,7 @@
 #include "GlobalNamespace/BeatmapLevelPack.hpp"
 #include "GlobalNamespace/BeatmapLevel.hpp"
 
-#include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/threading.hpp"
 #include "bsml/shared/BSML/MainThreadScheduler.hpp"
 
 #include <mutex>
@@ -100,8 +100,8 @@ namespace BetterSongList {
             return std::async(std::launch::deferred, []{});
         }
 
-        return il2cpp_utils::il2cpp_async(std::launch::async, [fullReload, this](){
-            il2cpp_utils::threading::OnScopeExit resetLoading([] {
+        return il2cpp_async(std::launch::async, [fullReload, this](){
+            i2c::on_scope_exit resetLoading([] {
                 isLoading.store(false, std::memory_order_release);
             });
 

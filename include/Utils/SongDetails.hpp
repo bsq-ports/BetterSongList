@@ -5,7 +5,7 @@
 #include "custom-types/shared/coroutine.hpp"
 #include "song-details/shared/SongDetails.hpp"
 #include "song-details/shared/Data/Song.hpp"
-#include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
+#include "GlobalNamespace/BeatmapCharacteristic.hpp"
 
 namespace BetterSongList::SongDetails {
     bool get_isAvailable();
@@ -18,6 +18,6 @@ namespace BetterSongList::SongDetails {
     void Init();
 
     SongDetailsCache::MapCharacteristic StringToBeatStarCharacteristics(std::string_view serializedName);
-    std::string BeatmapCharacteristicToString(GlobalNamespace::BeatmapCharacteristicSO* char_);
-    SongDetailsCache::MapCharacteristic BeatmapCharacteristicToBeatStarCharacteristic(GlobalNamespace::BeatmapCharacteristicSO* char_);
+    std::string BeatmapCharacteristicToString(GlobalNamespace::BeatmapCharacteristic char_);
+    SongDetailsCache::MapCharacteristic BeatmapCharacteristicToBeatStarCharacteristic(GlobalNamespace::BeatmapCharacteristic char_);
 }
