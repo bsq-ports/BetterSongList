@@ -180,11 +180,11 @@ namespace BetterSongList::Hooks {
         }
 
         auto withLegend = sorter ? sorter->as<ISorterWithLegend*>() : nullptr;
-        if (withLegend) {
+        if (withLegend && sorter->get_isReady()) {
             INFO("Sorter had legend!");
             customLegend = withLegend->BuildLegend(previewBeatmapLevels);
         } else {
-            ERROR("Sorter did not have legend!");
+            customLegend.clear();
         }
 
         INFO("Ended with {} levels in array", previewBeatmapLevels.size());
