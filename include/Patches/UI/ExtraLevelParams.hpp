@@ -29,7 +29,7 @@ namespace BetterSongList::Hooks {
             static HMUI::HoverHintController* get_hoverHintController();
 
         private:
-            static custom_types::Helpers::Coroutine ProcessFields();
+            static custom_types::Helpers::Coroutine ProcessFields(safe_ptr<UnityEngine::GameObject*> owner, safe_ptr<ArrayW<TMPro::TextMeshProUGUI*>> fieldRefs);
             static safe_ptr<GlobalNamespace::StandardLevelDetailView*> lastInstance;
             static safe_ptr<UnityEngine::GameObject*> extraUI;
             static safe_ptr<ArrayW<TMPro::TextMeshProUGUI*>> fields;

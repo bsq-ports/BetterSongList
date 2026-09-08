@@ -17,8 +17,11 @@
 #include "HMUI/TableView.hpp"
 #include "HMUI/NoTransitionsButton.hpp"
 
-void Scroll(HMUI::TableView* table, float step, int direction) {
-    auto cells = table->get_dataSource()->NumberOfCells();
+void Scroll(const safe_ptr<HMUI::TableView*>& table, float step, int direction) {
+    if (!table || !table->get_isActiveAndEnabled()) return;
+    auto* dataSource = table->get_dataSource();
+    if (!dataSource) return;
+    auto cells = dataSource->NumberOfCells();
     if (cells == 0) return;
     float amt = (float)cells * step * (float)direction;
 
@@ -30,9 +33,11 @@ void Scroll(HMUI::TableView* table, float step, int direction) {
 }
 
 namespace BetterSongList::Hooks {
+    static std::uint64_t restartGeneration = 0;
     std::array<safe_ptr<UnityEngine::GameObject*>, 4> ScrollEnhancement::buttons;
 
     void ScrollEnhancement::GameRestart() {
+        ++restartGeneration;
         for (auto& btn : buttons) {
             if (btn && btn.ptr() && btn->___m_CachedPtr.m_value) {
                 UnityEngine::Object::DestroyImmediate(btn.ptr());
@@ -43,8 +48,9 @@ namespace BetterSongList::Hooks {
 
     void ScrollEnhancement::LevelCollectionTableView_Init_Prefix(GlobalNamespace::LevelCollectionTableView* self, bool isInitialized, HMUI::TableView* tableView) {
         INFO("ScrollEnhancement::LevelCollectionTableView_Init_Prefix({}, {}, {})", fmt::ptr(self), isInitialized, fmt::ptr(tableView));
-        if (!isInitialized)
-            BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(SetupExtraScrollButtons(tableView, self->get_transform())));
+        if (!isInitialized) {
+            BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(SetupExtraScrollButtons(tableView, self->get_transform().ptr(), restartGeneration)));
+        }
 
         UpdateState();
     }
@@ -86,12 +92,10 @@ namespace BetterSongList::Hooks {
         return newBtn;
     }
 
-    static HMUI::TableView* storedTable = nullptr;
-
-    custom_types::Helpers::Coroutine ScrollEnhancement::SetupExtraScrollButtons(HMUI::TableView* table, UnityEngine::Transform* a) {
-        storedTable = table;
+    custom_types::Helpers::Coroutine ScrollEnhancement::SetupExtraScrollButtons(safe_ptr<HMUI::TableView*> table, safe_ptr<UnityEngine::Transform*> a, std::uint64_t generation) {
         co_yield reinterpret_cast<System::Collections::IEnumerator*>(UnityEngine::WaitForEndOfFrame::New_ctor());
 
+        if (!table || !a || generation != restartGeneration) co_return;
         auto r = table->get_transform()->get_parent()->get_parent().try_cast<UnityEngine::RectTransform>();
         auto sizeDelta = r->get_sizeDelta();
         sizeDelta.x += 4;
@@ -119,14 +123,15 @@ namespace BetterSongList::Hooks {
 
         
 
-        auto btnUpFast = BuildButton(button, MOD_ID "_double_arrow", 0, -90, [](){Scroll(storedTable, 0.1f, -1);});
-        auto btnDownFast = BuildButton(button, MOD_ID "_double_arrow", 0.86f, 90, [](){Scroll(storedTable, 0.1f, 1);});
+        auto btnUpFast = BuildButton(button, MOD_ID "_double_arrow", 0, -90, [table](){Scroll(table, 0.1f, -1);});
+        auto btnDownFast = BuildButton(button, MOD_ID "_double_arrow", 0.86f, 90, [table](){Scroll(table, 0.1f, 1);});
 
         buttons[0] = btnUpFast->get_gameObject();
-        buttons[1] = BuildButton(button, "#HeightIcon", 0.09f, 0, [](){Scroll(storedTable, 1.0f, 0);})->get_gameObject();
-        buttons[2] = BuildButton(button, "#HeightIcon", 0.77f, 180, [](){Scroll(storedTable, 1.0f, 1);})->get_gameObject();
+        buttons[1] = BuildButton(button, "#HeightIcon", 0.09f, 0, [table](){Scroll(table, 1.0f, 0);})->get_gameObject();
+        buttons[2] = BuildButton(button, "#HeightIcon", 0.77f, 180, [table](){Scroll(table, 1.0f, 1);})->get_gameObject();
         buttons[3] = btnDownFast->get_gameObject();
         co_yield nullptr;
+        if (!table || !a || generation != restartGeneration) co_return;
         UpdateState();
     }
 }

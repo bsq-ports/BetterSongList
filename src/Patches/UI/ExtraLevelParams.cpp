@@ -165,7 +165,7 @@ namespace BetterSongList::Hooks {
             extraUI->get_transform()->set_localPosition(pos);
 
             fields.emplace(static_cast<Array<TMPro::TextMeshProUGUI*>*>(extraUI->GetComponentsInChildren<HMUI::CurvedTextMeshPro*>(true).convert()));
-            BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(ProcessFields()));
+            BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(ProcessFields(extraUI, fields)));
         }
 
         lastInstance = self;
@@ -288,14 +288,22 @@ namespace BetterSongList::Hooks {
         hhint->set_text(hoverHint);
     }
 
-    custom_types::Helpers::Coroutine ExtraLevelParams::ProcessFields() {
-        if (!get_fields()) {
+    custom_types::Helpers::Coroutine ExtraLevelParams::ProcessFields(safe_ptr<UnityEngine::GameObject*> owner, safe_ptr<ArrayW<TMPro::TextMeshProUGUI*>> fieldRefs) {
+        if (!owner || !fieldRefs) {
             ERROR("Fields were not set, returning");
             co_return;
         }
 
         co_yield reinterpret_cast<System::Collections::IEnumerator*>(UnityEngine::WaitForEndOfFrame::New_ctor());
-        auto fieldsW = get_fields();
+        
+        // Lots of additional checks, to make sure it doesn't crash, originally it was just 
+        // auto fieldsW = get_fields();
+        if (!owner || owner.ptr() != get_extraUI() || fieldRefs.ptr().convert() != get_fields().convert()) co_return;
+        auto fieldsW = fieldRefs.ptr();
+        if (fieldsW.size() < 4) co_return;
+        for (int i = 0; i < 4; ++i) {
+            if (!fieldsW[i] || !fieldsW[i]->___m_CachedPtr.m_value) co_return;
+        }
 
         ModifyValue(fieldsW[0], "ScoreSaber PP Value", "#DifficultyIcon");
 		ModifyValue(fieldsW[1], "Star Rating", "#FavoritesIcon");
