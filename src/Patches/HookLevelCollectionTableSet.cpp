@@ -374,7 +374,7 @@ namespace BetterSongList::Hooks {
         auto data = ArrayW<GlobalNamespace::AlphabetScrollInfo::Data*>(il2cpp_array_size_t(customLegend.size()));
         DEBUG("Legend size: {}, {}", data.size(), customLegend.size());
         for (int i = 0; const auto& [key, value] : customLegend)
-            data[i++] = GlobalNamespace::AlphabetScrollInfo::Data::New_ctor(u'?', value);
+            data[i++] = GlobalNamespace::AlphabetScrollInfo::Data::New_ctor(u'?', value + (self->_showLevelPackHeader ? 1 : 0));
         DEBUG("Setting data");
         alphabetScrollBar->SetData(reinterpret_cast<System::Collections::Generic::IReadOnlyList_1<GlobalNamespace::AlphabetScrollInfo::Data*>*>(data.convert()));
 
