@@ -27,7 +27,7 @@ namespace BetterSongList {
     std::shared_future<void> FolderDateSorter::preparation;
     bool FolderDateSorter::eventsMapped = false;
 
-    FolderDateSorter::FolderDateSorter() : ISorterWithLegend(), ISorterPrimitive() { }
+    FolderDateSorter::FolderDateSorter() : ISorterWithLegend(), ISorterCustom() { }
 
     FolderDateSorter::~FolderDateSorter() {
         if (this->eventsMapped) {
@@ -115,13 +115,19 @@ namespace BetterSongList {
         return std::async(std::launch::deferred, [pending = preparation] { pending.get(); });
     }
 
-    std::optional<float> FolderDateSorter::GetValueFor(GlobalNamespace::BeatmapLevel* level) const {
+    std::optional<std::time_t> FolderDateSorter::GetValueFor(GlobalNamespace::BeatmapLevel* level) const {
 		std::string levelId = level ? level->___levelID : "";
         if (levelId.empty()) return std::nullopt;
         std::shared_lock<std::shared_mutex> lock(songTimesMutex);
         auto itr = songTimes.find(levelId);
         if (itr != songTimes.end()) return itr->second;
         return std::nullopt;
+    }
+
+    void FolderDateSorter::DoSort(ArrayW<GlobalNamespace::BeatmapLevel*>& levels, bool ascending) const {
+        auto compare = [this](auto* lhs, auto* rhs) { return GetValueFor(lhs) < GetValueFor(rhs); };
+        if (ascending) std::sort(levels.rbegin(), levels.rend(), compare);
+        else std::sort(levels.begin(), levels.end(), compare);
     }
 
     ISorterWithLegend::Legend FolderDateSorter::BuildLegend(ArrayW<GlobalNamespace::BeatmapLevel*> levels) const {

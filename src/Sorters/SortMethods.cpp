@@ -148,7 +148,7 @@ namespace BetterSongList {
     );
 
     static BasicSongDetailsSorterWithLegend beatSaverDate(
-        [](const SongDetailsCache::Song* song) -> std::optional<float> { 
+        [](const SongDetailsCache::Song* song) -> std::optional<double> {
             return song->uploadTimeUnix;
         },
         [](const SongDetailsCache::Song* song) -> std::string {

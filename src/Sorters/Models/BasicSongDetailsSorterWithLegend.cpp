@@ -17,7 +17,7 @@ namespace BetterSongList {
         BasicSongDetailsSorterWithLegend::LegendGetterFunc legendFunc
     ) : 
         ISorterWithLegend(),
-        ISorterPrimitive(),
+        ISorterCustom(),
         IAvailabilityCheck(),
         sortValueGetter(sortFunc), 
         legendValueGetter(legendFunc) {}
@@ -58,7 +58,7 @@ namespace BetterSongList {
         });
     }
 
-    std::optional<float> BasicSongDetailsSorterWithLegend::GetValueFor(GlobalNamespace::BeatmapLevel* level) const {
+    std::optional<double> BasicSongDetailsSorterWithLegend::GetValueFor(GlobalNamespace::BeatmapLevel* level) const {
         if (
             !SongDetails::get_songDetails()->songs.get_isDataAvailable() ||
             SongDetails::get_songDetails()->songs.size() == 0
@@ -71,6 +71,12 @@ namespace BetterSongList {
         if (song == SongDetailsCache::Song::none ) return std::nullopt;
 
         return sortValueGetter(&song);
+    }
+
+    void BasicSongDetailsSorterWithLegend::DoSort(ArrayW<GlobalNamespace::BeatmapLevel*>& levels, bool ascending) const {
+        auto compare = [this](auto* lhs, auto* rhs) { return GetValueFor(lhs) < GetValueFor(rhs); };
+        if (ascending) std::sort(levels.rbegin(), levels.rend(), compare);
+        else std::sort(levels.begin(), levels.end(), compare);
     }
 
     std::string BasicSongDetailsSorterWithLegend::GetUnavailableReason() const {
