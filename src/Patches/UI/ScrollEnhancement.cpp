@@ -16,20 +16,22 @@
 #include "HMUI/ImageView.hpp"
 #include "HMUI/TableView.hpp"
 #include "HMUI/NoTransitionsButton.hpp"
+#include <algorithm>
 
 void Scroll(const safe_ptr<HMUI::TableView*>& table, float step, int direction) {
     if (!table || !table->get_isActiveAndEnabled()) return;
     auto* dataSource = table->get_dataSource();
     if (!dataSource) return;
     auto cells = dataSource->NumberOfCells();
-    if (cells == 0) return;
-    float amt = (float)cells * step * (float)direction;
+    if (cells <= 0) return;
+    int target = cells * direction;
 
     if (step != 1) {
-        amt += table->GetVisibleCellsIdRange()->get_Item1();
+        const int distance = std::max(1, static_cast<int>(cells * step));
+        target = table->GetVisibleCellsIdRange()->get_Item1() + distance * direction;
     }
 
-    table->ScrollToCellWithIdx(amt, HMUI::TableView::ScrollPositionType::Beginning, true);
+    table->ScrollToCellWithIdx(std::clamp(target, 0, cells - 1), HMUI::TableView::ScrollPositionType::Beginning, true);
 }
 
 namespace BetterSongList::Hooks {
