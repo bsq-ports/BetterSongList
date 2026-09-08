@@ -3,12 +3,14 @@
 #include "logging.hpp"
 #include "songcore/shared/SongCore.hpp"
 
+#include <atomic>
+#include <mutex>
 #include <thread>
 
 namespace BetterSongList::SongDetails {
-    static SongDetailsCache::SongDetails* songDetails = nullptr;
+    static std::atomic<SongDetailsCache::SongDetails*> songDetails = nullptr;
     SongDetailsCache::SongDetails* get_songDetails() {
-        return songDetails;
+        return songDetails.load(std::memory_order_acquire);
     }
 
     bool get_isAvailable() {
@@ -16,45 +18,57 @@ namespace BetterSongList::SongDetails {
     }
 
     bool CheckAvailable() {
-        if (songDetails == nullptr)
+        auto* details = get_songDetails();
+        if (details == nullptr)
             return false;
 
-        return  songDetails->songs.get_isDataAvailable();
+        return details->songs.get_isDataAvailable();
     }
 
-    static bool finishedInitAttempt = false;
+    static std::atomic_bool finishedInitAttempt = false;
     bool get_finishedInitAttempt() {
-        return finishedInitAttempt;
+        return finishedInitAttempt.load(std::memory_order_acquire);
     }
     
-    static bool attemptedToInit = false;
+    static std::atomic_bool attemptedToInit = false;
     bool get_attemptedToInit() {
-        return attemptedToInit;
+        return attemptedToInit.load(std::memory_order_acquire);
+    }
+
+    static std::mutex loadErrorMutex;
+    static std::string loadError;
+
+    static void OnDataLoadFailed(std::string message) {
+        std::lock_guard lock(loadErrorMutex);
+        loadError = std::move(message);
     }
 
     std::string GetUnavailabilityReason() {
-        if (finishedInitAttempt && (!songDetails || !songDetails->songs.get_isDataAvailable() || songDetails->songs.size() == 0)) {
-            return "Initialization failed";
+        if (!get_finishedInitAttempt()) return "";
+        auto* details = get_songDetails();
+        if (!details || !details->songs.get_isDataAvailable() || details->songs.size() == 0) {
+            std::lock_guard lock(loadErrorMutex);
+            return loadError.empty() ? "Initialization failed" : loadError;
         }
         return "";
     }
 
     void Init() {
-        if (attemptedToInit) return;
-        attemptedToInit = true;
+        if (attemptedToInit.exchange(true, std::memory_order_acq_rel)) return;
+        SongDetailsCache::SongDetails::dataLoadFailed.addCallback(&OnDataLoadFailed);
         std::thread([](){
             DEBUG("Getting songdetails");
-            songDetails = SongDetailsCache::SongDetails::Init().get();
+            auto* details = SongDetailsCache::SongDetails::Init().get();
+            songDetails.store(details, std::memory_order_release);
             DEBUG("Got songdetails");
 
 
-            if (!songDetails->songs.get_isDataAvailable()) {
-                finishedInitAttempt = true;
+            if (!details->songs.get_isDataAvailable()) {
                 DEBUG("BSL Failed");
             } else {
-                DEBUG("BSL Not failed Songs size:{}", songDetails->songs.size());
-                finishedInitAttempt = true;
+                DEBUG("BSL Not failed Songs size:{}", details->songs.size());
             }
+            finishedInitAttempt.store(true, std::memory_order_release);
         }).detach();
     }
 

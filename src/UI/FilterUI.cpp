@@ -191,7 +191,7 @@ namespace BetterSongList {
 
         auto instance = get_instance();
         if (unavCheck && !reason.empty()) {
-            instance->ShowErrorASAP(fmt::format("Can't sort by {} - ", selected, reason));
+            instance->ShowErrorASAP(fmt::format("Can't sort by {} - {}", selected, reason));
 			SetSort("", false, false);
             return;
         }
