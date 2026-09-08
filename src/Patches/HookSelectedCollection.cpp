@@ -6,6 +6,7 @@
 #include "GlobalNamespace/BeatmapLevelPack.hpp"
 
 #include "System/Collections/Generic/IReadOnlyList_1.hpp"
+#include "System/Collections/Generic/IReadOnlyCollection_1.hpp"
 
 #include "songcore/shared/SongCore.hpp"
 #include "Patches/HookLevelCollectionTableSet.hpp"
@@ -71,6 +72,12 @@ namespace BetterSongList::Hooks {
 
     // HookLevelCollectionInit
     void HookSelectedCollection::AnnotatedBeatmapLevelCollectionsViewController_SetData_PostFix(GlobalNamespace::AnnotatedBeatmapLevelCollectionsViewController* self) {
-        AnnotatedBeatmapLevelCollectionsViewController_HandleDidSelectAnnotatedBeatmapLevelCollection_Prefix(self->_annotatedBeatmapLevelCollections->get_Item(self->_selectedItemIndex));
+        auto* packs = self->_annotatedBeatmapLevelCollections;
+        const auto index = self->_selectedItemIndex;
+        GlobalNamespace::BeatmapLevelPack* selectedPack = nullptr;
+        if (packs && index >= 0 && index < packs->i___System__Collections__Generic__IReadOnlyCollection_1_T_()->get_Count()) {
+            selectedPack = packs->get_Item(index);
+        }
+        AnnotatedBeatmapLevelCollectionsViewController_HandleDidSelectAnnotatedBeatmapLevelCollection_Prefix(selectedPack);
     }
 }
