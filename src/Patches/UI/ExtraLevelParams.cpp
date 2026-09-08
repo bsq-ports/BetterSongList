@@ -258,15 +258,12 @@ namespace BetterSongList::Hooks {
                 fieldsW[3]->set_text("...");
             }
 
-            auto customBeatmapLevelOpt = i2c::try_cast<SongCore::SongLoader::CustomBeatmapLevel*>(level);
-            // Basegame maps have no NJS or JD
-            if (customBeatmapLevelOpt) {
-                float_t njs = basicData->___noteJumpMovementSpeed;
-                fieldsW[2]->set_text(fmt::format("{:1.1f}", basicData->___noteJumpMovementSpeed));
-            } else {
-                float_t njs = GlobalNamespace::BeatmapDifficultyMethods::DefaultNoteJumpMovementSpeed(selectedDifficultyBeatmap.difficulty);
-                fieldsW[2]->set_text(fmt::format("{:1.1f}", njs));
-            }
+            const auto njs = GlobalNamespace::BeatmapDifficultyMethods::NoteJumpMovementSpeed(
+                selectedDifficultyBeatmap.difficulty,
+                basicData ? basicData->___noteJumpMovementSpeed : 0.0f,
+                false
+            );
+            fieldsW[2]->set_text(fmt::format("{:1.1f}", njs));
         } else {
             ERROR("Fields was nullptr!");
         }
