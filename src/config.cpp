@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "Utils/FileUtils.hpp"
 #include "beatsaber-hook/shared/utils.hpp"
 #include "reflectcpp/include/rfl/json.hpp"
 #include "logging.hpp"
@@ -30,7 +31,7 @@ void Config::SaveConfig() {
     Save(preferredLeaderboard);
 
     try {
-        if (!writefile(get_config_path(MOD_ID), rfl::json::write(doc))) {
+        if (!BetterSongList::FileUtils::WriteFileAtomic(get_config_path(MOD_ID), rfl::json::write(doc))) {
             ERROR("Failed to write configuration");
             return;
         }
