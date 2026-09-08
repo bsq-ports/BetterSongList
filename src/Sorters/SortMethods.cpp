@@ -154,9 +154,8 @@ namespace BetterSongList {
             auto uploaded = song->uploadTimeUnix;
             auto time = (time_t) uploaded;
             struct tm* tm = localtime(&time);
-            // since int division is floored, we can get an index for quarter by removing 1 and dividing by 3,
-            // then we just add 1 back to get from 0-3 to 1-4
-            auto q = ((tm->tm_mon - 1) / 3) + 1;
+            // tm_mon is zero-based; each group of three months forms a quarter.
+            auto q = tm->tm_mon / 3 + 1;
 
             // tm year is years since 1900, if we want years since 2000 we do -100
             // ex: 2022 is 122 since 1900, so 122 - 100 = 22 which is what we want to display
